@@ -291,6 +291,7 @@ public class CommandSFTP {
 
     /**
      * Adds a host key to the specified file.
+     * Modified from https://stackoverflow.com/questions/19063115/jschexception-unknownhostkey
      * @param key key that is to be added to the file
      * @param fileName file that will hold the key.
      * @return true on success, false otherwise.
