@@ -18,7 +18,7 @@ public class CommandSFTP {
     private String hostIP = null;
     private String knownHostsFile = null;
     private int portNumber;
-    private final String [] hostChecking = {"StrictHostKeyChecking", "ask"};
+    private final String [] hostChecking = {"StrictHostKeyChecking", "yes"};
     private boolean isConnected = false;
 
     private JSch jsch = null;
