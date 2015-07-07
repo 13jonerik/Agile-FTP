@@ -36,6 +36,7 @@ public class Main {
                     user.promptPassword();
                     command.setUser(user);
 
+                    //Validate user input
                     if (!(user.validUser() && command.isValid())) {
                         System.out.println("\nRequires valid User and Server Info!");
                         break;
@@ -53,7 +54,6 @@ public class Main {
 
                 } break;
                 case "2": {
-                    command.quit();
                     quit = true;
                 } break;
                 default:

@@ -229,6 +229,7 @@ public class CommandSFTP {
                     setFileDisplay();
                 } break;
                 case "5": {
+                    this.quit();
                     quit = true;
                 } break;
                 default:
