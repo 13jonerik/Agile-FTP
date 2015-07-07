@@ -5,9 +5,9 @@ import com.jcraft.jsch.UserInfo;
 import java.util.Scanner;
 
 /** Stores user information that is needed to connect to a server
- * Created by Stephan Gelever on 7/1/15.
  * @author Stephan Gelever
  * @version 1.0 alpha
+ * @since July 5, 2015
  */
 
 public class User implements UserInfo {
@@ -58,7 +58,7 @@ public class User implements UserInfo {
      */
 
     public boolean validUser() {
-        return ((this.userName != "") && (this.password != ""));
+        return ((!this.userName.equals("")) && (!this.password.equals("")));
     }
 
     /**

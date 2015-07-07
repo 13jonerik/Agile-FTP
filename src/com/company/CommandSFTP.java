@@ -9,17 +9,18 @@ import java.util.Scanner;
 import java.util.Vector;
 
 /**
- * Created by Stephan Gelever on 7/5/15.
  * Handles the logging in and the commands sent to the server.
  * @author Stephan Gelever
  * @version 1.0 alpha
+ * @since July 5, 2015
  */
 public class CommandSFTP {
-    private String hostIP = null;
-    private String knownHostsFile = null;
+    private String hostIP = "";
+    private String knownHostsFile = "";
     private int portNumber;
     private final String [] hostChecking = {"StrictHostKeyChecking", "yes"};
     private boolean isConnected = false;
+    private User user = null;
 
     private JSch jsch = null;
     private Session session = null;
@@ -34,8 +35,23 @@ public class CommandSFTP {
      */
     public CommandSFTP() {
         this.jsch = new JSch();
-        this.jsch.setConfig(hostChecking[0], hostChecking[1]);
+        JSch.setConfig(hostChecking[0], hostChecking[1]);
         this.portNumber = 22;
+    }
+
+    /**
+     * Constructor that sets all parameters necessary to connect
+     * @param hostIp server ip address
+     * @param portNumber port number to connect to
+     * @param knownHostsFile ssh key known hosts file to check
+     */
+    public CommandSFTP(String hostIp, int portNumber, String knownHostsFile){
+
+        this.jsch = new JSch();
+        JSch.setConfig(hostChecking[0], hostChecking[1]);
+        this.portNumber = portNumber;
+        this.hostIP = hostIp;
+        this.knownHostsFile = knownHostsFile;
     }
 
     /**
@@ -74,32 +90,52 @@ public class CommandSFTP {
     }
 
     /**
+     * Sets the user information
+      * @param user holds user information
+     */
+    public void setUser(User user) {
+        this.user = user;
+    }
+
+
+    /**
      * Connects the user to the specifed server. Assumes server information has already been provided.
-     * @param user User information
      * @return true if successful connection, false otherwise.
      */
-    public boolean connect(User user) {
+    public boolean connect() {
+        if (this.user == null) {
+            return false;
+        }
         //TODO(): Check is server information has already been provided.
         setKnownHostsFile(this.knownHostsFile);
 
-        try {
-            this.session = this.jsch.getSession(user.getUserName(), this.hostIP, this.portNumber);
 
-        }
-        catch (JSchException je) {
-            //TODO: Handle exception properly
-            System.err.println(je);
-            return false;
-        }
-        this.session.setPassword(user.getPassword());
-
-        if (!(connectSession(user) && channelConnect())) {
+        if (!(setSession(this.user) && connectSession(this.user) && channelConnect())) {
             return false;
         }
         this.isConnected = true;
 
         return true;
 
+    }
+
+    /**
+     * Requests a session from jsch with the server information and sets the user password.
+     * @param user  User information
+     * @return true on success, false otherwise
+     */
+    private boolean setSession(User user) {
+
+        try {
+            this.session = this.jsch.getSession(user.getUserName(), this.hostIP, this.portNumber);
+            this.session.setPassword(user.getPassword());
+        }
+        catch (JSchException je) {
+            //TODO: Handle exception properly
+            System.err.println(je);
+            return false;
+        }
+        return true;
     }
 
     /**
@@ -369,7 +405,8 @@ public class CommandSFTP {
         return this.jsch != null &&
                 this.hostIP != null &&
                 this.knownHostsFile != null &&
-                this.portNumber >= 0;
+                this.portNumber >= 0 &&
+                this.user != null;
     }
 
     /**

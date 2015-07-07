@@ -6,6 +6,7 @@ import java.util.Scanner;
  * This Class handles the main menu that users see when then first start the program.
  * @author  Stephan Gelever
  * @version 1.0
+ * @since July 5, 2015
  */
 
 public class Main {
@@ -33,6 +34,7 @@ public class Main {
                     command.promptInfo();
                     user.promptUserName();
                     user.promptPassword();
+                    command.setUser(user);
 
                     if (!(user.validUser() && command.isValid())) {
                         System.out.println("\nRequires valid User and Server Info!");
@@ -41,7 +43,7 @@ public class Main {
 
 
                     //If the connection is valid, proceed to SFTP application
-                    if(!command.connect(user)){
+                    if(!command.connect()){
                         System.out.println("\nError Connecting!");
                         continue;
                     }

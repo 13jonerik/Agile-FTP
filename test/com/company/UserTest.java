@@ -6,13 +6,13 @@ import org.junit.Test;
 import static org.junit.Assert.assertEquals;
 
 /**
- * Created by Stephan Gelever on 7/6/15.
- *
+ * User test cases
  * @author Stephan Gelever
  * @version 1.0 alpha
+ * @since July 5, 2015
  */
 public class UserTest {
-    User invalidUser;
+    private User invalidUser;
     private User validUser;
 
     @Before
