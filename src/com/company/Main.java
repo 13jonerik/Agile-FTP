@@ -45,7 +45,7 @@ public class Main {
 
                     //If the connection is valid, proceed to SFTP application
                     if(!command.connect()){
-                        System.out.println("\nError Connecting!");
+                        //System.out.println("Error Connecting!");
                         continue;
                     }
                     else {
@@ -65,10 +65,10 @@ public class Main {
 
     /**
      * Displays an initial user menu.
-     * TODO(): Possible add more selections (options, load user from file, etc).
      */
     private static void showMainMenu() {
-        System.out.println("\nMain Menu:\n" +
+        //TODO(): Possible add more selections (options, load user from file, etc).
+        System.out.println("Main Menu:\n" +
                 "\t1.Connect to Server\n" +
                 "\t2.Quit");
     }

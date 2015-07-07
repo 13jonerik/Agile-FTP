@@ -2,6 +2,7 @@ package com.company;
 
 import com.jcraft.jsch.UserInfo;
 
+import java.io.Console;
 import java.util.Scanner;
 
 /** Stores user information that is needed to connect to a server
@@ -97,9 +98,19 @@ public class User implements UserInfo {
         showMessage("Password:");
 
         //TODO(gelever): possibly use password masking? so it doesn't show up on CLI
-        //https://docs.oracle.com/javase/7/docs/api/java/io/Console.html#readPassword%28%29
-        this.password = sc.nextLine();
-        return password != null;
+        //Modified from https://docs.oracle.com/javase/7/docs/api/java/io/Console.html#readPassword%28%29
+        Console cons;
+        char[] passwd;
+        if ((cons = System.console()) != null &&
+                (passwd = cons.readPassword()) != null) {
+            this.password = new String(passwd);
+            java.util.Arrays.fill(passwd, ' ');
+        }
+        else {
+            this.password = sc.nextLine();
+        }
+
+        return this.password != null;
     }
 
 

@@ -72,15 +72,30 @@ public class CommandSFTP {
 
         showMessage("Port Number:");
         boolean validPort = false;
+        int userInput;
 
-        while (!validPort) {
-            if (sc.hasNextInt()) {
-                this.portNumber = sc.nextInt();
-                validPort = true;
+        //TODO(gelever): Clean this up, more readable?
+
+        while(!validPort) {
+
+            while (!(sc.hasNextInt())) {
+                sc.next();
+                showMessage("Positive Integers Only!");
             }
+
+            //TODO(gelever): Lookup and place better bounds on port number
+            userInput = sc.nextInt();
+            if (userInput > 0) {
+                this.portNumber = userInput;
+                validPort = true;
+                sc.nextLine();
+            }
+            else {
+                showMessage("Positive Integers Only!");
+            }
+
         }
 
-        sc.nextLine();
         showMessage("KnownHosts File Location\n" +
                 "Will be created if it doesn't exist\n" +
                 "Leave blank to create ~/.ssh/sftp_hosts:");
@@ -103,7 +118,8 @@ public class CommandSFTP {
      * @return true if successful connection, false otherwise.
      */
     public boolean connect() {
-        if (this.user == null) {
+        if (!(this.user != null &&
+                this.user.validUser())) {
             return false;
         }
         //TODO(): Check is server information has already been provided.
@@ -149,7 +165,7 @@ public class CommandSFTP {
             this.channel.connect();
         }
         catch (JSchException e) {
-            System.err.println(e);
+            showMessage("Unable to Connect!");
             return false;
         }
         return true;
@@ -170,32 +186,42 @@ public class CommandSFTP {
                 showMessage("\nInvalid info\n");
                 return false;
             }
-            //HostFileError
+            //Unknown Host
             else if(je.getMessage().contains("UnknownHost")) {
+                showMessage("Can't reach server!");
+                return false;
+
+            }
+            //HostFileError
+            else if(je.getMessage().contains("reject HostKey")) {
 
                 //Prompt user to add key to host file.
-                boolean addAHost = addHost(session.getHostKey().getKey(), this.knownHostsFile);
-                if (!addAHost) {
-                    showMessage("\nCannot connect without known hosts file!");
+                if(session.getHostKey() != null) {
+                    if(!addHost(session.getHostKey().getKey(), this.knownHostsFile)){
+                        showMessage("\nCannot connect without known hosts file!");
+                        return false;
+                    }
+                }
+                else {
+                    showMessage("Unable to reach server!");
+                    return false;
+                }
+
+                boolean success = setKnownHostsFile(this.knownHostsFile);
+                if (!success) {
+                    showMessage("Unable to set host file\n");
                     return false;
                 }
                 else {
-                    boolean success = setKnownHostsFile(this.knownHostsFile);
-                    if (!success) {
-                        showMessage("Unable to set host file\n");
-                        return false;
+                    //Retry connection after setting up new host file key.
+                    try {
+                        this.session = this.jsch.getSession(user.getUserName(), this.hostIP, this.portNumber);
+                        this.session.setPassword(user.getPassword());
+                        this.session.connect();
                     }
-                    else {
-                        //Retry connection after setting up new host file key.
-                        try {
-                            this.session = this.jsch.getSession(user.getUserName(), this.hostIP, this.portNumber);
-                            this.session.setPassword(user.getPassword());
-                            this.session.connect();
-                        }
-                        catch (JSchException tryAgain) {
-                            System.err.println(tryAgain.getCause().toString());
-                           showMessage("Unable to connect!");
-                        }
+                    catch (JSchException tryAgain) {
+                        System.err.println(tryAgain.getCause().toString());
+                        showMessage("Unable to connect!");
                     }
                 }
             }
@@ -208,7 +234,7 @@ public class CommandSFTP {
      */
     public void commands() {
         if (!isConnected()) {
-            showMessage("\nNot Connected!");
+            showMessage("Not Connected!");
         }
 
         boolean quit = false;
@@ -223,7 +249,7 @@ public class CommandSFTP {
                     listCurrentFiles();
                 } break;
                 case "3": {
-                    showMessage("\nAdd commands here\n");
+                    showMessage("Add commands here! So many options!");
                 } break;
                 case "4": {
                     setFileDisplay();
