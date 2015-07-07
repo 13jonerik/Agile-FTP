@@ -29,7 +29,7 @@ public class UserTest {
 
     @Test
     public void testinValidUser() throws Exception {
-        assertEquals (false, !invalidUser.validUser());
+        assertEquals (false, invalidUser.validUser());
 
     }
 
