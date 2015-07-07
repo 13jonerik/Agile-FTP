@@ -11,27 +11,28 @@ import java.util.Scanner;
  */
 
 public class User implements UserInfo {
-    private String userName;
-    private String password;
-    private String passPhrase;
+    protected String userName;
+    protected String password;
+    protected String passPhrase = "";
 
-    private static Scanner sc = new Scanner(System.in);
+    protected static Scanner sc = new Scanner(System.in);
 
     /**
      * Default constructor.
      */
     public User () {
-        this.userName = null;
-        this.password = null;
-        this.passPhrase = null;
+        this.userName = "";
+        this.password = "";
     }
 
     /**
      * Constructor sets user name
      * @param name the users login name
      */
-    public User(String name) {
+    public User(String name, String password) {
+        this.password = password;
         this.userName = name;
+
     }
 
     /**
@@ -57,7 +58,7 @@ public class User implements UserInfo {
      */
 
     public boolean validUser() {
-        return (this.userName != null && this.password != null);
+        return ((this.userName != "") && (this.password != ""));
     }
 
     /**
