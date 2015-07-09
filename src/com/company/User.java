@@ -138,6 +138,6 @@ public class User implements UserInfo {
      */
     @Override
     public void showMessage(String s) {
-        System.out.println(s + " ");
+        System.out.print(s + " ");
     }
 }

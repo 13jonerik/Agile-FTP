@@ -25,7 +25,7 @@ public class CommandSFTP {
     private JSch jsch = null;
     private Session session = null;
     private ChannelSftp channel = null;
-
+    private final int timeout = 2000;
     private boolean fileDisplay = false;
 
     private static Scanner sc = new Scanner(System.in);
@@ -162,7 +162,7 @@ public class CommandSFTP {
 
         try {
             this.channel = (ChannelSftp)this.session.openChannel("sftp");
-            this.channel.connect();
+            this.channel.connect(timeout);
         }
         catch (JSchException e) {
             showMessage("Unable to Connect!");
@@ -178,12 +178,16 @@ public class CommandSFTP {
      */
     private boolean connectSession(User user) {
         try {
-            this.session.connect();
+            this.session.connect(timeout);
         }
         catch (JSchException je) {
             //Connection error
-            if (je.getMessage().contains("socket")) {
-                showMessage("\nInvalid info\n");
+            if (je.getMessage().contains("timeout")) {
+                showMessage("Server Timeout!");
+                return false;
+            }
+            else if (je.getMessage().contains("socket")) {
+                showMessage("\nUnable to connect to server!\n");
                 return false;
             }
             //Unknown Host
@@ -192,6 +196,7 @@ public class CommandSFTP {
                 return false;
 
             }
+
             //HostFileError
             else if(je.getMessage().contains("reject HostKey")) {
 
@@ -441,6 +446,6 @@ public class CommandSFTP {
      * @param s Message to display.
      */
     public void showMessage(String s) {
-        System.out.println(s + " ");
+        System.out.print(s + " ");
     }
 }
