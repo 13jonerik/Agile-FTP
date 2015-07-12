@@ -547,8 +547,8 @@ public class CommandSFTP {
             this.localCurrentDirectory = userInput;
         }
         //Relative path
-        else if(new File(this.localCurrentDirectory + userInput).isDirectory()) {
-            this.localCurrentDirectory = this.localCurrentDirectory + userInput;
+        else if(new File(this.localCurrentDirectory + "/" + userInput).isDirectory()) {
+            this.localCurrentDirectory = this.localCurrentDirectory + "/" + userInput;
         }
         else {
             showMessage("Directory Not Found!");
