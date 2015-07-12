@@ -49,7 +49,7 @@ public class Main {
                         continue;
                     }
                     else {
-                        command.commands();
+                        command.mainSFTPMenu();
                     }
 
                 } break;
@@ -61,6 +61,7 @@ public class Main {
                     break;
             }
         }
+        System.exit(0);
     }
 
     /**
@@ -68,7 +69,7 @@ public class Main {
      */
     private static void showMainMenu() {
         //TODO(): Possible add more selections (options, load user from file, etc).
-        System.out.println("Main Menu:\n" +
+        System.out.println("\nMain Menu:\n" +
                 "\t1.Connect to Server\n" +
                 "\t2.Quit");
     }
