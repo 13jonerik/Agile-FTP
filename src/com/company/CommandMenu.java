@@ -27,7 +27,7 @@ public class CommandMenu {
     }
 
 
-    public static void showRemoteDirectoryMenu(String location) {
+    public static void showDirectoryMenu(String location) {
         System.out.println("\n" + location + " Directory Menu:\n" +
                 "\t1.List Current Directory\n" +
                 "\t2.List Files in Current Directory\n" +

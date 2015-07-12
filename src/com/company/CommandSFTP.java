@@ -29,7 +29,7 @@ public class CommandSFTP {
     private static final int timeout = 10000;
     private boolean fileDisplay = false;
 
-    private String localCurrentDirectory = "/";
+    private String localCurrentDirectory = System.getProperty("user.home");
 
     private static Scanner sc = new Scanner(System.in);
 
@@ -257,6 +257,7 @@ public class CommandSFTP {
                     optionsSFTPMenu();
                 } break;
                 case "4": {
+                    this.quit();
                     return;
                 }
                 default:
@@ -307,7 +308,7 @@ public class CommandSFTP {
         //TODO(gelever): Finish up these calls.
         boolean quit = false;
         while(!quit) {
-            CommandMenu.showRemoteDirectoryMenu("Remote");
+            CommandMenu.showDirectoryMenu("Remote");
             String userInput = sc.nextLine();
             switch(userInput) {
                 case "1": {
@@ -442,9 +443,7 @@ public class CommandSFTP {
      * Handles local file menu system for local file management.
      */
     private void localSFTPMenu() {
-        if (!isConnected()) {
-            showMessage("Not Connected!");
-        }
+        checkConnected();
 
         //TODO(gelever): Finish up these calls.
         boolean quit = false;
@@ -453,13 +452,16 @@ public class CommandSFTP {
             String userInput = sc.nextLine();
             switch(userInput) {
                 case "1": {
-
+                    showMessage("NOT WORKING ATM");
+                    localFileSFTPMenu();
                 } break;
                 case "2": {
-
+                    localDirSFTPMenu();
+                    showMessage("NOT WORKING ATM");
                 } break;
                 case "3": {
-
+                    showMessage("NOT WORKING ATM");
+                    localPermissionSFTPMenu();
                 } break;
                 case "4": {
                     return;
@@ -469,6 +471,18 @@ public class CommandSFTP {
             }
         }
 
+    }
+
+    private void localPermissionSFTPMenu() {
+        //TODO(): IMPLEMENT THIS.
+    }
+
+    private void localDirSFTPMenu() {
+        //TODO(): IMPLEMENT THIS.
+    }
+
+    private void localFileSFTPMenu() {
+        //TODO(): IMPLEMENT THIS.
     }
 
     /**
