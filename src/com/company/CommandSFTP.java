@@ -760,17 +760,17 @@ public class CommandSFTP {
     private void listCurrentRemoteFiles() {
         checkConnected();
         try {
-            //TODO(): Handle Unchecked Assignment.
-            Vector<ChannelSftp.LsEntry> ls = channel.ls(channel.pwd());
+            Vector ls = channel.ls(channel.pwd());
             if (ls == null) {
                 return;
             }
-            for (ChannelSftp.LsEntry s : ls) {
-                if(this.fileDisplay) {
-                    System.out.println(s.getLongname());
-                }
-                else {
-                    System.out.println(s.getFilename());
+            for (Object s : ls) {
+                if (s instanceof  ChannelSftp.LsEntry) {
+                    if (this.fileDisplay) {
+                        System.out.println(((ChannelSftp.LsEntry)s).getLongname());
+                    } else {
+                        System.out.println(((ChannelSftp.LsEntry)s).getFilename());
+                    }
                 }
             }
         }
