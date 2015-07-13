@@ -789,7 +789,8 @@ public class CommandSFTP {
      */
     private boolean addHost(String key, String fileName){
         //NOTE(gelever): this is a bit messy to display, but necessary?
-        showMessage("\nAdd to host file?(Y/N): \n" + this.hostIP + " ssh-rsa " + key);
+        showMessage("\n" + this.hostIP + " ssh-rsa " + key +"\n");
+        showMessage("Add to host file?(Y/N): ");
         String userInput = sc.nextLine();
         if(userInput.equalsIgnoreCase("y")) {
             try {
@@ -829,6 +830,9 @@ public class CommandSFTP {
             //showMessage(je.toString());
             if (fileName.equals("")) {
                 String userHome = System.getProperty( "user.home" );
+                if (! new File(userHome + ".ssh").isDirectory()) {
+                        new File(userHome +"/.ssh").mkdir();
+                }
                 this.knownHostsFile = userHome + "/.ssh/sftp_hosts";
 
                 fileName = this.knownHostsFile;
