@@ -70,38 +70,42 @@ public class CommandSFTP {
      */
 
     public void promptInfo() {
-        showMessage("Host IP:");
+        showMessage("Host IP: ");
         this.hostIP = sc.nextLine();
 
-        showMessage("Port Number:");
-        boolean validPort = false;
         int userInput;
 
-        //TODO(gelever): Clean this up, more readable?
+        while(true) {
+            showMessage("Port Number (Default: 22): ");
+            String userString = sc.nextLine();
+            if (userString.equals("")) {
+                this.portNumber = 22;
+                break;
+            }
 
-        while(!validPort) {
+            try {
+               userInput = Integer.parseInt(userString);
 
-            while (!(sc.hasNextInt())) {
-                sc.next();
-                showMessage("Positive Integers Only:");
+            }
+            catch (NumberFormatException e) {
+                showMessage("Positive Integers Only!\n");
+                continue;
             }
 
             //TODO(gelever): Lookup and place better bounds on port number
-            userInput = sc.nextInt();
             if (userInput > 0) {
                 this.portNumber = userInput;
-                validPort = true;
-                sc.nextLine();
+                break;
             }
             else {
-                showMessage("Positive Integers Only:");
+                showMessage("Positive Integers Only!\n");
             }
 
         }
 
         showMessage("KnownHosts File Location\n" +
                 "Will be created if it doesn't exist\n" +
-                "Leave blank to create ~/.ssh/sftp_hosts:");
+                "Leave blank to create ~/.ssh/sftp_hosts: ");
         this.knownHostsFile = sc.nextLine();
 
 
@@ -511,7 +515,7 @@ public class CommandSFTP {
      * Prompts the user to delete a file.
      */
     private void deleteRemoteFile() {
-        showMessage("File to Delete:");
+        showMessage("File to Delete: ");
         deleteRemoteFile(sc.nextLine());
     }
 
@@ -543,7 +547,7 @@ public class CommandSFTP {
         }
     }
     private void uploadRemoteFile() {
-        showMessage("File to Upload:");
+        showMessage("File to Upload: ");
         uploadRemoteFile(sc.nextLine());
     }
 
@@ -565,7 +569,7 @@ public class CommandSFTP {
      * Prompts user to change remote directory.
      */
     private void changeRemoteDirectory() {
-        showMessage("Remote Directory:");
+        showMessage("Remote Directory: ");
         changeRemoteDirectory(sc.nextLine());
     }
 
@@ -601,7 +605,7 @@ public class CommandSFTP {
      * Changes the current local directory.
      */
     private void changeCurrentLocalDirectory() {
-        showMessage("Directory:");
+        showMessage("Directory: ");
         String userInput = sc.nextLine();
 
         //Absolute path
@@ -670,7 +674,7 @@ public class CommandSFTP {
      * Prompts user to receive remote file.
      */
     private void getRemoteFile() {
-        showMessage("File Name:");
+        showMessage("File Name: ");
         String userInput = sc.nextLine();
         getRemoteFile(userInput);
     }
@@ -679,7 +683,7 @@ public class CommandSFTP {
      * Prompts user to retrieve multiple remote files.
      */
     private void getMultipleRemote() {
-        showMessage("Files (space separated):");
+        showMessage("Files (space separated): ");
         String [] files = sc.nextLine().split(" ");
         for (String s: files) {
             getRemoteFile(s);
@@ -752,7 +756,7 @@ public class CommandSFTP {
 
     private void setTimeout() {
         checkConnected();
-        showMessage("Timeout in milliseconds:");
+        showMessage("Timeout in milliseconds: ");
         boolean validTime= false;
         int userInput;
 
@@ -762,7 +766,7 @@ public class CommandSFTP {
 
             while (!(sc.hasNextInt())) {
                 sc.next();
-                showMessage("Positive Integers Only:");
+                showMessage("Positive Integers Only: ");
             }
             userInput = sc.nextInt();
             if (userInput >= 0) {
@@ -771,7 +775,7 @@ public class CommandSFTP {
                 sc.nextLine();
             }
             else {
-                showMessage("Positive Integers Only:");
+                showMessage("Positive Integers Only: ");
             }
 
         }
@@ -785,7 +789,7 @@ public class CommandSFTP {
     private boolean overWriteLocalFile(String fileName) {
         //Absolute file path
         if(new File(fileName).isFile() || new File(fileName).isDirectory()) {
-            showMessage("Local Overwrite " + fileName + "? (Y/N):");
+            showMessage("Local Overwrite " + fileName + "? (Y/N): ");
             String userInput = sc.nextLine();
             return userInput.equalsIgnoreCase("y");
         }
@@ -793,7 +797,7 @@ public class CommandSFTP {
         //Relative file path
         if(new File(this.localCurrentDirectory + "/" + fileName).isFile() ||
                 new File(this.localCurrentDirectory + "/" + fileName).isDirectory()) {
-            showMessage("Local Overwrite " + fileName + "? (Y/N):");
+            showMessage("Local Overwrite " + fileName + "? (Y/N): ");
             String userInput = sc.nextLine();
             return userInput.equalsIgnoreCase("y");
         }
@@ -945,6 +949,6 @@ public class CommandSFTP {
      * @param s Message to display.
      */
     public void showMessage(String s) {
-        System.out.print(s + " ");
+        System.out.print(s);
     }
 }
