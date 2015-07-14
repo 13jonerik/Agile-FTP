@@ -49,8 +49,9 @@ public class CommandMenu {
         System.out.println("\nRemote File Menu:\n" +
                 "\t1.Upload File to Remote Directory\n" +
                 "\t2.Download File from Remote Directory\n" +
-                "\t3.Delete File from Remote Directory\n" +
-                "\t4.Remote Menu");
+                "\t3.Download Multiple Files\n" +
+                "\t4.Delete File from Remote Directory\n" +
+                "\t5.Remote Menu");
     }
 
     public static void showOptionsMenu() {

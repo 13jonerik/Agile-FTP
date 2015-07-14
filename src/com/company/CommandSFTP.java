@@ -150,8 +150,8 @@ public class CommandSFTP {
             this.session.setPassword(user.getPassword());
         }
         catch (JSchException je) {
-            //TODO: Handle exception properly
-            System.err.println(je);
+            //TODO: Handle exception properly?
+            showMessage("Unable to Connect!\n");
             return false;
         }
         return true;
@@ -242,8 +242,7 @@ public class CommandSFTP {
      */
     public void mainSFTPMenu() {
         checkConnected();
-        boolean quit = false;
-        while(!quit) {
+        while(true) {
             CommandMenu.showMainSFTPMenu();
             String userInput = sc.nextLine();
             switch(userInput) {
@@ -306,8 +305,7 @@ public class CommandSFTP {
         checkConnected();
 
         //TODO(gelever): Finish up these calls.
-        boolean quit = false;
-        while(!quit) {
+        while(true) {
             CommandMenu.showDirectoryMenu("Remote");
             String userInput = sc.nextLine();
             switch(userInput) {
@@ -325,7 +323,7 @@ public class CommandSFTP {
                 } break;
                 case "5": {
                     //TODO(): Make sure this works for directories
-                   deleteRemoteFile();
+                   deleteRemoteDirectory();
                 } break;
                 case "6": {
                    //TODO(): Implement this
@@ -338,14 +336,6 @@ public class CommandSFTP {
                     showMessage("\nInvalid Command!\n");
             }
         }
-
-    }
-
-    /**
-     * Renames a remote directory.
-     */
-    private void renameRemoteDirectory() {
-       //TODO(gelever): implement this.
 
     }
 
@@ -363,9 +353,12 @@ public class CommandSFTP {
                     getRemoteFile();
                 } break;
                 case "3": {
-                    deleteRemoteFile();
+                    getMultipleRemote();
                 } break;
                 case "4": {
+                    deleteRemoteFile();
+                } break;
+                case "5": {
                     return;
                 }
                 default:
@@ -375,10 +368,6 @@ public class CommandSFTP {
 
     }
 
-    private void uploadRemoteFile() {
-        //TODO: IMPLEMENT THIS
-    }
-
     /**
      * Handles remote file menu system for remote management
      */
@@ -386,8 +375,7 @@ public class CommandSFTP {
         checkConnected();
 
         //TODO(gelever): Finish up these calls.
-        boolean quit = false;
-        while(!quit) {
+        while(true) {
             CommandMenu.showManageMenu("Remote");
             String userInput = sc.nextLine();
             switch(userInput) {
@@ -398,7 +386,6 @@ public class CommandSFTP {
                     remoteSFTPDirMenu();
                 } break;
                 case "3": {
-                    remoteSFTPMenu();
                     //TODO(): Finish remote permistions menu and uncomment out.
                     //remoteSFTPPermissionMenu();
                 } break;
@@ -416,8 +403,7 @@ public class CommandSFTP {
         //TODO(gelever) Implement this!
 
         //TODO(gelever): Finish up these calls.
-        boolean quit = false;
-        while(!quit) {
+        while(true) {
             CommandMenu.showRemotePermisionsMenu();
             String userInput = sc.nextLine();
             switch(userInput) {
@@ -446,8 +432,7 @@ public class CommandSFTP {
         checkConnected();
 
         //TODO(gelever): Finish up these calls.
-        boolean quit = false;
-        while(!quit) {
+        while(true) {
             CommandMenu.showManageMenu("Local");
             String userInput = sc.nextLine();
             switch(userInput) {
@@ -483,6 +468,39 @@ public class CommandSFTP {
 
     private void localFileSFTPMenu() {
         //TODO(): IMPLEMENT THIS.
+    }
+
+    /**
+     * Renames a remote directory.
+     */
+    private void renameRemoteDirectory() {
+        //TODO(gelever): implement this.
+
+    }
+
+    /**
+     * Prompts the user to delete a file.
+     */
+    private void deleteRemoteFile() {
+        showMessage("File to Delete:");
+        deleteRemoteFile(sc.nextLine());
+    }
+
+    /**
+     * Attempts to delete a remote file.
+     * @param fileName file to delete.
+     */
+    private void deleteRemoteFile(String fileName) {
+        try {
+            this.channel.rm(fileName);
+        }
+        catch (SftpException e) {
+            showMessage("Unable to Delete File!");
+        }
+    }
+
+    private void uploadRemoteFile() {
+        //TODO: IMPLEMENT THIS
     }
 
     /**
@@ -597,12 +615,10 @@ public class CommandSFTP {
             Files.move(new File(fileName).toPath(), putFile.toPath(), StandardCopyOption.ATOMIC_MOVE);
         }
         catch (IOException e) {
-            System.out.println(e);
             showMessage("Unable to create local file!");
         }
         catch(SftpException e) {
             showMessage("Unable to retrieve remote file!");
-            System.out.println(e);
         }
     }
 
@@ -649,10 +665,10 @@ public class CommandSFTP {
     }
 
     /**
-     * Attempts to delete a remote file.
+     * Attempts to delete a remote directory.
      * @param fileName file to delete.
      */
-    private void deleteRemoteFile(String fileName) {
+    private void deleteRemoteDirectory(String fileName) {
         checkConnected();
         try {
             this.channel.rmdir(fileName);
@@ -665,9 +681,9 @@ public class CommandSFTP {
     /**
      * Prompts user to delete remote file.
      */
-    private void deleteRemoteFile() {
+    private void deleteRemoteDirectory() {
         showMessage("Directory to delete: ");
-        deleteRemoteFile(sc.nextLine());
+        deleteRemoteDirectory(sc.nextLine());
     }
 
     /**
@@ -723,14 +739,16 @@ public class CommandSFTP {
      * @return true to over write or not found, false otherwise.
      */
     private boolean overWriteLocalFile(String fileName) {
+        //Absolute file path
         if(new File(fileName).isFile() || new File(fileName).isDirectory()) {
             showMessage("Local Overwrite " + fileName + "? (Y/N):");
             String userInput = sc.nextLine();
             return userInput.equalsIgnoreCase("y");
         }
 
-        if(new File(this.localCurrentDirectory + fileName).isFile() ||
-                new File(this.localCurrentDirectory + fileName).isDirectory()) {
+        //Relative file path
+        if(new File(this.localCurrentDirectory + "/" + fileName).isFile() ||
+                new File(this.localCurrentDirectory + "/" + fileName).isDirectory()) {
             showMessage("Local Overwrite " + fileName + "? (Y/N):");
             String userInput = sc.nextLine();
             return userInput.equalsIgnoreCase("y");
