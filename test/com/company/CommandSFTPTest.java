@@ -28,6 +28,7 @@ public class CommandSFTPTest {
 
    @After
    public void after() throws Exception {
+      validCommand.quit();
    }
 
 
@@ -48,7 +49,6 @@ public class CommandSFTPTest {
 //TODO: Test goes here...
       validCommand.connect();
       assertEquals(true, validCommand.isConnected());
-      validCommand.quit();
    }
 
    /**

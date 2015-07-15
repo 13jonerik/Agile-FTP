@@ -102,9 +102,7 @@ public class CommandSFTP {
 
         }
 
-        showMessage("KnownHosts File Location\n" +
-                "Will be created if it doesn't exist\n" +
-                "Leave blank to create ~/.ssh/sftp_hosts: ");
+        showMessage("KnownHosts File (~/.ssh/sftp_hosts): ");
         this.knownHostsFile = sc.nextLine();
 
 
@@ -297,9 +295,6 @@ public class CommandSFTP {
                     showMessage("MORE OPTIONS");
                 } break;
                 case 5: {
-                    showMessage("MORE OPTIONS");
-                } break;
-                case 6: {
                     return;
                 }
                 default:
@@ -657,7 +652,7 @@ public class CommandSFTP {
 
     /**
      * Retrieves a file from the current local directory.
-     * @param fileName File to retreive.
+     * @param fileName File to receive.
      */
     private void getRemoteFile(String fileName) {
         checkConnected();
@@ -674,7 +669,7 @@ public class CommandSFTP {
             showMessage("Unable to create local file!");
         }
         catch(SftpException e) {
-            showMessage("Unable to retrieve remote file!");
+            showMessage("Unable to retrieve remote file: " + fileName + "\n");
         }
     }
 
@@ -767,7 +762,7 @@ public class CommandSFTP {
 
         int userInput;
         while(true) {
-            showMessage("Timeout in milliseconds: ");
+            showMessage("Timeout in Milliseconds: ");
             String userString = sc.nextLine();
 
             try {
@@ -797,7 +792,7 @@ public class CommandSFTP {
     private boolean overWriteLocalFile(String fileName) {
         //Absolute file path
         if(new File(fileName).isFile() || new File(fileName).isDirectory()) {
-            showMessage("Local Overwrite " + fileName + "? (Y/N): ");
+            showMessage("OverWrite Local File?: " + fileName + " (Y/N): ");
             String userInput = sc.nextLine();
             return userInput.equalsIgnoreCase("y");
         }
