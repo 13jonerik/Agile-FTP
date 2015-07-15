@@ -1,5 +1,7 @@
 package com.company;
 
+import java.util.Scanner;
+
 /**
  * @author Stephan Gelever
  * @version 1.0 alpha
@@ -10,61 +12,102 @@ public class CommandMenu {
     /**
      * Displays the SFTP Menu to the user.
      */
-    public static void showMainSFTPMenu() {
-        System.out.println("\nSFTP Menu:\n" +
-                "\t1.Remote File Management\n" +
-                "\t2.Local File Management\n" +
-                "\t3.Options\n" +
-                "\t4.Quit");
+    public static int showMainSFTPMenu() {
+        return processMenu("SFTP Menu", new String[] {
+                "Remote File Management",
+                        "Local File Management",
+                        "Options",
+                        "Quit"
+        });
     }
 
-    public static void showManageMenu(String location) {
-        System.out.println("\n" + location + " Menu:\n" +
-                "\t1.File Management\n" +
-                "\t2.Directory Management\n" +
-                "\t3.Permission Management\n" +
-                "\t4.SFTP Menu");
+    public static int showManageMenu(String location) {
+        return processMenu(location + " Menu", new String[] {
+                "File Management",
+                        "Directory Management",
+                        "Permission Management",
+                        "SFTP Menu"
+        });
     }
 
 
-    public static void showDirectoryMenu(String location) {
-        System.out.println("\n" + location + " Directory Menu:\n" +
-                "\t1.List Current Directory\n" +
-                "\t2.List Files in Current Directory\n" +
-                "\t3.Change Directory\n" +
-                "\t4.Create Directory\n" +
-                "\t5.Delete Directory\n" +
-                "\t6.Rename Directory\n" +
-                "\t7." + location + " Menu");
+    public static int showDirectoryMenu(String location) {
+        return processMenu(location + " Directory Menu", new String[] {
+                "List Current Directory",
+                "List Files in Current Directory",
+                "Change Directory",
+                "Create Directory",
+                "Delete Directory",
+                "Rename Directory",
+                location + " Menu"
+        });
     }
 
-    public static void showLocalFileMenu() {
-        System.out.println("\nLocal File Menu:\n" +
-                "\t1.Rename File\n" +
-                "\t2.Option\n" +
-                "\t3.Option\n" +
-                "\t4.Local Menu");
+    public static int showLocalFileMenu() {
+        return processMenu("Local File Menu", new String[] {
+                "Rename File",
+                "Option",
+                "Option",
+                "More Option",
+                "Local Menu"
+        });
     }
-    public static void showRemoteFileMenu() {
-        System.out.println("\nRemote File Menu:\n" +
-                "\t1.Upload File to Remote Directory\n" +
-                "\t2.Download File from Remote Directory\n" +
-                "\t3.Download Multiple Files\n" +
-                "\t4.Delete File from Remote Directory\n" +
-                "\t5.Remote Menu");
-    }
-
-    public static void showOptionsMenu() {
-        System.out.println("\nOptions Menu:\n" +
-                "\t1.Set Timeout Length\n" +
-                "\t2.Show Full File Details\n" +
-                "\t3.Option\n" +
-                "\t4.Option\n" +
-                "\t5.Option\n" +
-                "\t6.SFTP Menu");
+    public static int showRemoteFileMenu() {
+        return processMenu("Remote File Menu", new String[] {
+                "Upload File to Remote Directory",
+                "Download File from Remote Directory",
+                "Download Multiple Files",
+                "Delete File from Remote Directory",
+                "Remote Menu" });
     }
 
-    public static void showRemotePermisionsMenu() {
+    public static int showOptionsMenu() {
+        return processMenu("Options Menu", new String[] {
+                "Set Timeout Length",
+                "Show Full File Details",
+                "More Option",
+                "More Option",
+                "SFTP Menu"
+        });
+    }
+
+    public static int showRemotePermissionsMenu() {
+
+        return processMenu("Remote Permissions Menu", new String[] {
+                "Option",
+                "Option",
+                "More Option",
+                "More Option",
+                "Remote Menu"
+        });
+    }
+
+    public static int processMenu(String title, String [] options) {
+        System.out.println("\n" +title +":");
+        for (int i = 0; i < options.length; ++i) {
+                System.out.println("\t" + (i + 1) + "." + " " + options[i]);
+        }
+        while(true) {
+            Scanner sc = new Scanner(System.in);
+            String userString = sc.nextLine();
+            int userInput;
+            try {
+                userInput = Integer.parseInt(userString);
+
+            }
+            catch (NumberFormatException e) {
+                System.out.println("Invalid Input!\n");
+                continue;
+            }
+
+            if (userInput > 0 && userInput <= options.length) {
+                return userInput;
+            }
+            else {
+                System.out.println("Invalid Input!\n");
+            }
+
+        }
 
     }
 }

@@ -92,8 +92,7 @@ public class CommandSFTP {
                 continue;
             }
 
-            //TODO(gelever): Lookup and place better bounds on port number
-            if (userInput > 0) {
+            if (userInput > 0 && userInput < 65536) {
                 this.portNumber = userInput;
                 break;
             }
@@ -126,10 +125,10 @@ public class CommandSFTP {
      */
     public boolean connect() {
         if (!(this.user != null &&
-                this.user.validUser())) {
+                this.user.validUser() && this.isValid())) {
             return false;
         }
-        //TODO(): Check is server information has already been provided.
+
         setKnownHostsFile(this.knownHostsFile);
 
 
@@ -249,22 +248,24 @@ public class CommandSFTP {
             return;
         }
         while(true) {
-            CommandMenu.showMainSFTPMenu();
-            String userInput = sc.nextLine();
+            int userInput = CommandMenu.showMainSFTPMenu();
             switch(userInput) {
-                case "1": {
+                case 1: {
                     remoteSFTPMenu();
                 } break;
-                case "2": {
+                case 2: {
                     localSFTPMenu();
                 } break;
-                case "3": {
+                case 3: {
                     optionsSFTPMenu();
                 } break;
-                case "4": {
-                    this.quit();
-                    return;
-                }
+                case 4: {
+                    showMessage("Really Quit? (Y/N):");
+                    if (sc.nextLine().equalsIgnoreCase("y")) {
+                        this.quit();
+                        return;
+                    }
+                } break;
                 default:
                     showMessage("\nInvalid Command!\n");
             }
@@ -281,25 +282,24 @@ public class CommandSFTP {
             return;
         }
         while(true) {
-            CommandMenu.showOptionsMenu();
-            String userInput = sc.nextLine();
+            int userInput = CommandMenu.showOptionsMenu();
             switch(userInput) {
-                case "1": {
+                case 1: {
                    setTimeout();
                 } break;
-                case "2": {
+                case 2: {
                     setFileDisplay();
                 } break;
-                case "3": {
+                case 3: {
                     showMessage("MORE OPTIONS");
                 } break;
-                case "4": {
+                case 4: {
                     showMessage("MORE OPTIONS");
                 } break;
-                case "5": {
+                case 5: {
                     showMessage("MORE OPTIONS");
                 } break;
-                case "6": {
+                case 6: {
                     return;
                 }
                 default:
@@ -309,6 +309,9 @@ public class CommandSFTP {
 
     }
 
+    /**
+     * Handles remote directory menu system for remote management
+     */
     private void remoteSFTPDirMenu() {
         if (!checkConnected()) {
             return;
@@ -316,61 +319,29 @@ public class CommandSFTP {
 
         //TODO(gelever): Finish up these calls.
         while(true) {
-            CommandMenu.showDirectoryMenu("Remote");
-            String userInput = sc.nextLine();
+            int userInput = CommandMenu.showDirectoryMenu("Remote");
             switch(userInput) {
-                case "1": {
+                case 1: {
                     listCurrentRemoteDirectory();
                 } break;
-                case "2": {
+                case 2: {
                     listCurrentRemoteFiles();
                 } break;
-                case "3": {
+                case 3: {
                     changeRemoteDirectory();
                 } break;
-                case "4": {
+                case 4: {
                     createRemoteDir();
                 } break;
-                case "5": {
+                case 5: {
                     //TODO(): Make sure this works for directories
                    deleteRemoteDirectory();
                 } break;
-                case "6": {
+                case 6: {
                    //TODO(): Implement this
                     renameRemoteDirectory();
                 } break;
-                case "7": {
-                    return;
-                }
-                default:
-                    showMessage("\nInvalid Command!\n");
-            }
-        }
-
-    }
-
-    private void remoteSFTPFileMenu() {
-        if (!checkConnected()) {
-            return;
-        }
-
-        while(true) {
-            CommandMenu.showRemoteFileMenu();
-            String userInput = sc.nextLine();
-            switch(userInput) {
-                case "1": {
-                    uploadRemoteFile();
-                } break;
-                case "2": {
-                    getRemoteFile();
-                } break;
-                case "3": {
-                    getMultipleRemote();
-                } break;
-                case "4": {
-                    deleteRemoteFile();
-                } break;
-                case "5": {
+                case 7: {
                     return;
                 }
                 default:
@@ -383,27 +354,27 @@ public class CommandSFTP {
     /**
      * Handles remote file menu system for remote management
      */
-    private void remoteSFTPMenu() {
+    private void remoteSFTPFileMenu() {
         if (!checkConnected()) {
             return;
         }
 
-        //TODO(gelever): Finish up these calls.
         while(true) {
-            CommandMenu.showManageMenu("Remote");
-            String userInput = sc.nextLine();
+            int userInput = CommandMenu.showRemoteFileMenu();
             switch(userInput) {
-                case "1": {
-                   remoteSFTPFileMenu();
+                case 1: {
+                    uploadRemoteFile();
                 } break;
-                case "2": {
-                    remoteSFTPDirMenu();
+                case 2: {
+                    getRemoteFile();
                 } break;
-                case "3": {
-                    //TODO(): Finish remote permistions menu and uncomment out.
-                    //remoteSFTPPermissionMenu();
+                case 3: {
+                    getMultipleRemote();
                 } break;
-                case "4": {
+                case 4: {
+                    deleteRemoteFile();
+                } break;
+                case 5: {
                     return;
                 }
                 default:
@@ -413,6 +384,41 @@ public class CommandSFTP {
 
     }
 
+    /**
+     * Handles remote file and directory menu system for remote management
+     */
+    private void remoteSFTPMenu() {
+        if (!checkConnected()) {
+            return;
+        }
+
+        //TODO(gelever): Finish up these calls.
+        while(true) {
+            int userInput = CommandMenu.showManageMenu("Remote");
+            switch(userInput) {
+                case 1: {
+                   remoteSFTPFileMenu();
+                } break;
+                case 2: {
+                    remoteSFTPDirMenu();
+                } break;
+                case 3: {
+                    //TODO(): Finish remote permissions menu and uncomment out.
+                    //remoteSFTPPermissionMenu();
+                } break;
+                case 4: {
+                    return;
+                }
+                default:
+                    showMessage("\nInvalid Command!\n");
+            }
+        }
+
+    }
+
+    /**
+     * Handles remote file permissions menu system for remote management
+     */
     private void remoteSFTPPermissionMenu() {
         if (!checkConnected()) {
             return;
@@ -420,16 +426,15 @@ public class CommandSFTP {
 
         //TODO(gelever): Finish up these calls.
         while(true) {
-            CommandMenu.showRemotePermisionsMenu();
-            String userInput = sc.nextLine();
+            int userInput = CommandMenu.showRemotePermissionsMenu();
             switch(userInput) {
-                case "1": {
+                case 1: {
 
                 } break;
-                case "2": {
+                case 2: {
 
                 } break;
-                case "3": {
+                case 3: {
                     return;
                 }
                 default:
@@ -451,22 +456,21 @@ public class CommandSFTP {
 
         //TODO(gelever): Finish up these calls.
         while(true) {
-            CommandMenu.showManageMenu("Local");
-            String userInput = sc.nextLine();
+            int userInput = CommandMenu.showManageMenu("Local");
             switch(userInput) {
-                case "1": {
+                case 1: {
                     showMessage("NOT WORKING ATM");
                     localFileSFTPMenu();
                 } break;
-                case "2": {
+                case 2: {
                     localDirSFTPMenu();
                     showMessage("NOT WORKING ATM");
                 } break;
-                case "3": {
+                case 3: {
                     showMessage("NOT WORKING ATM");
                     localPermissionSFTPMenu();
                 } break;
-                case "4": {
+                case 4: {
                     return;
                 }
                 default:
@@ -546,6 +550,10 @@ public class CommandSFTP {
             showMessage("Unable to Upload File!");
         }
     }
+
+    /**
+     * Prompts the user to select file to upload to remote directory.
+     */
     private void uploadRemoteFile() {
         showMessage("File to Upload: ");
         uploadRemoteFile(sc.nextLine());
@@ -756,26 +764,26 @@ public class CommandSFTP {
 
     private void setTimeout() {
         checkConnected();
-        showMessage("Timeout in milliseconds: ");
-        boolean validTime= false;
+
         int userInput;
+        while(true) {
+            showMessage("Timeout in milliseconds: ");
+            String userString = sc.nextLine();
 
-        //TODO(gelever): Clean this up, more readable?
-
-        while(!validTime) {
-
-            while (!(sc.hasNextInt())) {
-                sc.next();
-                showMessage("Positive Integers Only: ");
+            try {
+                userInput = Integer.parseInt(userString);
             }
-            userInput = sc.nextInt();
+            catch (NumberFormatException e) {
+                showMessage("Positive Integers Only!\n");
+                continue;
+            }
+
             if (userInput >= 0) {
                 setTimeout(userInput);
-                validTime = true;
-                sc.nextLine();
+                break;
             }
             else {
-                showMessage("Positive Integers Only: ");
+                showMessage("Positive Integers Only!\n");
             }
 
         }
@@ -919,6 +927,10 @@ public class CommandSFTP {
                 this.user != null;
     }
 
+    /**
+     * Checks if the session is currently connectec, closes all channels otherwise
+     * @return true if still connected, false otherwise
+     */
     private boolean checkConnected() {
         if (!this.isConnected()) {
             showMessage("Not Connected!");
@@ -944,6 +956,7 @@ public class CommandSFTP {
         }
         return false;
     }
+
     /**
      * Displays a message to the user.
      * @param s Message to display.
