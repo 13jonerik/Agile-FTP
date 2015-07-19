@@ -295,6 +295,10 @@ public class CommandSFTP {
                     showMessage("MORE OPTIONS");
                 } break;
                 case 5: {
+                    showMessage("Really Quit? (Y/N):");
+                    if (sc.nextLine().equalsIgnoreCase("y")) {
+                        this.quit();
+                    }
                     return;
                 }
                 default:
@@ -337,7 +341,11 @@ public class CommandSFTP {
                     renameRemoteDirectory();
                 } break;
                 case 7: {
-                    return;
+                    showMessage("Really Quit? (Y/N):");
+                    if (sc.nextLine().equalsIgnoreCase("y")) {
+                        this.quit();
+                        return;
+                    }
                 }
                 default:
                     showMessage("\nInvalid Command!\n");
@@ -370,7 +378,11 @@ public class CommandSFTP {
                     deleteRemoteFile();
                 } break;
                 case 5: {
-                    return;
+                    showMessage("Really Quit? (Y/N):");
+                    if (sc.nextLine().equalsIgnoreCase("y")) {
+                        this.quit();
+                        return;
+                    }
                 }
                 default:
                     showMessage("\nInvalid Command!\n");
@@ -402,7 +414,11 @@ public class CommandSFTP {
                     //remoteSFTPPermissionMenu();
                 } break;
                 case 4: {
-                    return;
+                    showMessage("Really Quit? (Y/N):");
+                    if (sc.nextLine().equalsIgnoreCase("y")) {
+                        this.quit();
+                        return;
+                    }
                 }
                 default:
                     showMessage("\nInvalid Command!\n");
@@ -600,6 +616,7 @@ public class CommandSFTP {
         }
         catch (SftpException je) {
             //TODO(): Handle this more gracefully?
+            System.err.println("Error in Listing Directory: " + je);
             //showMessage(je.toString());
         }
     }
