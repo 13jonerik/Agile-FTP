@@ -208,8 +208,14 @@ public class CommandSFTP {
 
                 //Prompt user to add key to host file.
                 if(session.getHostKey() != null) {
-                    if(!addHost(session.getHostKey().getKey(), this.knownHostsFile)){
+                    showMessage("Add '" + this.hostIP + "' to host file?(Y/N): ");
+                    String userInput = sc.nextLine();
+                    if(userInput.equalsIgnoreCase("y")) {
                         showMessage("\nCannot connect without known hosts file!");
+                        return false;
+                    }
+                    if(!addHost(session.getHostKey().getKey(), this.knownHostsFile)){
+                        showMessage("Error setting known hosts file!");
                         return false;
                     }
                 }
@@ -297,10 +303,6 @@ public class CommandSFTP {
                     showMessage("MORE OPTIONS");
                 } break;
                 case 5: {
-                    showMessage("Really Quit? (Y/N):");
-                    if (sc.nextLine().equalsIgnoreCase("y")) {
-                        this.quit();
-                    }
                     return;
                 }
                 default:
@@ -343,11 +345,7 @@ public class CommandSFTP {
                     renameRemoteDirectory();
                 } break;
                 case 7: {
-                    showMessage("Really Quit? (Y/N):");
-                    if (sc.nextLine().equalsIgnoreCase("y")) {
-                        this.quit();
-                        return;
-                    }
+                    return;
                 }
                 default:
                     showMessage("\nInvalid Command!\n");
@@ -380,11 +378,8 @@ public class CommandSFTP {
                     deleteRemoteFile();
                 } break;
                 case 5: {
-                    showMessage("Really Quit? (Y/N):");
-                    if (sc.nextLine().equalsIgnoreCase("y")) {
-                        this.quit();
-                        return;
-                    }
+                    return;
+
                 }
                 default:
                     showMessage("\nInvalid Command!\n");
@@ -416,11 +411,8 @@ public class CommandSFTP {
                     //remoteSFTPPermissionMenu();
                 } break;
                 case 4: {
-                    showMessage("Really Quit? (Y/N):");
-                    if (sc.nextLine().equalsIgnoreCase("y")) {
-                        this.quit();
-                        return;
-                    }
+                    return;
+
                 }
                 default:
                     showMessage("\nInvalid Command!\n");
@@ -556,8 +548,14 @@ public class CommandSFTP {
     private void uploadRemoteFile(String fileName) {
         //TODO: Test this more
         //TODO: Create overwrite prompt for remote file upload. is possible?
+        String absoluteFileName = this.localCurrentDirectory + "/" + fileName;
+        File testExists = new File(absoluteFileName);
+        if(!testExists.exists()) {
+            showMessage("Unable to Find Local File: " + fileName );
+            return;
+        }
         try {
-            this.channel.put(this.localCurrentDirectory + "/" + fileName, this.channel.pwd());
+            this.channel.put(absoluteFileName, this.channel.pwd());
 
         } catch (SftpException e) {
             showMessage("Unable to Upload File!");
@@ -792,7 +790,9 @@ public class CommandSFTP {
      */
 
     private void setTimeout() {
-        checkConnected();
+        if (!checkConnected()) {
+            return;
+        }
 
         int userInput;
         while(true) {
@@ -846,7 +846,9 @@ public class CommandSFTP {
      * Lists files on the remote working directory.
      */
     private void listCurrentRemoteFiles() {
-        checkConnected();
+        if (!checkConnected()) {
+            return;
+        }
         try {
             Vector ls = channel.ls(channel.pwd());
             if (ls == null) {
@@ -876,29 +878,22 @@ public class CommandSFTP {
      * @return true on success, false otherwise.
      */
     private boolean addHost(String key, String fileName){
-        showMessage("Add '" + this.hostIP + "' to host file?(Y/N): ");
-        String userInput = sc.nextLine();
-        if(userInput.equalsIgnoreCase("y")) {
-            try {
-                FileWriter tmpwriter;
-                File file = new File(fileName);
-                if (!file.exists()) {
-                    file.createNewFile();
-                }
-                tmpwriter = new FileWriter(file);
-                tmpwriter.append(this.hostIP + " ssh-rsa " + key + "\n");
-
-                tmpwriter.flush();
-                tmpwriter.close();
-
-            } catch (IOException e) {
-                e.printStackTrace();
-                return false;
+        try {
+            FileWriter tmpwriter;
+            File file = new File(fileName);
+            if (!file.exists()) {
+                file.createNewFile();
             }
+            tmpwriter = new FileWriter(file);
+            tmpwriter.append(this.hostIP + " ssh-rsa " + key + "\n");
 
-            return true;
+            tmpwriter.flush();
+            tmpwriter.close();
+
+        } catch (IOException e) {
+            return false;
         }
-        return false;
+        return true;
     }
 
     /**

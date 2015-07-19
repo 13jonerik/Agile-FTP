@@ -26,7 +26,8 @@ public class CommandMenu {
                 "File Management",
                         "Directory Management",
                         "Permission Management",
-                        "SFTP Menu"
+                        "SFTP Menu",
+
         });
     }
 
@@ -67,7 +68,7 @@ public class CommandMenu {
                 "Show Full File Details",
                 "More Option",
                 "More Option",
-                "SFTP Menu"
+                "SFTP Menu",
         });
     }
 
