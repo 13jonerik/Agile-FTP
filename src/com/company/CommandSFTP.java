@@ -28,6 +28,7 @@ public class CommandSFTP {
     private ChannelSftp channel = null;
     private static final int timeout = 10000;
     private boolean fileDisplay = false;
+    private boolean checkConnect = true;
 
     private String localCurrentDirectory = System.getProperty("user.home");
 
@@ -70,6 +71,7 @@ public class CommandSFTP {
      */
 
     public void promptInfo() {
+        checkConnect = true;                     //reset to true so user can log back in from main menu
         showMessage("Host IP: ");
         this.hostIP = sc.nextLine();
 
@@ -250,28 +252,32 @@ public class CommandSFTP {
      * Handles SFTP Menu user input.
      */
     public void mainSFTPMenu() {
-        if (!checkConnected()) {
+        System.out.println("HELLO");
+        if (!checkConnect) {
+            this.quit();
             return;
         }
-        while(true) {
+        while(checkConnect) {
             int userInput = CommandMenu.showMainSFTPMenu();
             switch(userInput) {
                 case 1: {
                     remoteSFTPMenu();
-                } break;
+                    return;
+                }
                 case 2: {
                     localSFTPMenu();
-                } break;
+                    return;
+                }
                 case 3: {
                     optionsSFTPMenu();
-                } break;
+                    return;
+                }
                 case 4: {
-                    showMessage("Really Quit? (Y/N): ");
-                    if (sc.nextLine().equalsIgnoreCase("y")) {
-                        this.quit();
-                        return;
-                    }
-                } break;
+                    showMessage("Server Disconnected! \n");
+                    checkConnect =false;
+                    return;
+
+                }
                 default:
                     showMessage("\nInvalid Command!\n");
             }
@@ -284,26 +290,37 @@ public class CommandSFTP {
      * Handles options menu system.
      */
     private void optionsSFTPMenu() {
-        if (!checkConnected()) {
+        if (!checkConnect) {
+            this.quit();
             return;
         }
-        while(true) {
+        while(checkConnect) {
             int userInput = CommandMenu.showOptionsMenu();
             switch(userInput) {
                 case 1: {
                    setTimeout();
-                } break;
+                    return;
+                }
                 case 2: {
                     setFileDisplay();
-                } break;
+                    return;
+                }
                 case 3: {
                     showMessage("MORE OPTIONS");
-                } break;
+                    return;
+                }
                 case 4: {
                     showMessage("MORE OPTIONS");
-                } break;
+                    return;
+                }
                 case 5: {
                     return;
+                }
+                case 6: {
+                    showMessage("Server Disconnected! \n");
+                    checkConnect =false;
+                    return;
+
                 }
                 default:
                     showMessage("\nInvalid Command!\n");
@@ -316,35 +333,47 @@ public class CommandSFTP {
      * Handles remote directory menu system for remote management
      */
     private void remoteSFTPDirMenu() {
-        if (!checkConnected()) {
+        if (!checkConnect) {
+            this.quit();
             return;
         }
 
         //TODO(gelever): Finish up these calls.
-        while(true) {
+        while(checkConnect) {
             int userInput = CommandMenu.showDirectoryMenu("Remote");
             switch(userInput) {
                 case 1: {
                     listCurrentRemoteDirectory();
-                } break;
+                    return;
+                }
                 case 2: {
                     listCurrentRemoteFiles();
-                } break;
+                    return;
+                }
                 case 3: {
                     changeRemoteDirectory();
-                } break;
+                    return;
+                }
                 case 4: {
                     createRemoteDir();
-                } break;
+                    return;
+                }
                 case 5: {
                     //TODO(): Make sure this works for directories
-                   deleteRemoteDirectory();
-                } break;
+                    deleteRemoteDirectory();
+                    return;
+                }
                 case 6: {
                    //TODO(): Implement this
                     renameRemoteDirectory();
-                } break;
+                    return;
+                }
                 case 7: {
+                    return;
+                }
+                case 8: {
+                    showMessage("Server Disconnected! \n");
+                    checkConnect =false;
                     return;
                 }
                 default:
@@ -358,28 +387,37 @@ public class CommandSFTP {
      * Handles remote file menu system for remote management
      */
     private void remoteSFTPFileMenu() {
-        if (!checkConnected()) {
+        if (!checkConnect) {
+            this.quit();
             return;
         }
 
-        while(true) {
+        while(checkConnect) {
             int userInput = CommandMenu.showRemoteFileMenu();
             switch(userInput) {
                 case 1: {
                     uploadRemoteFile();
-                } break;
+                    return;
+                }
                 case 2: {
                     getRemoteFile();
-                } break;
+                    return;
+                }
                 case 3: {
                     getMultipleRemote();
-                } break;
+                    return;
+                }
                 case 4: {
                     deleteRemoteFile();
-                } break;
+                    return;
+                }
                 case 5: {
                     return;
-
+                }
+                case 6: {
+                    showMessage("Server Disconnected! \n");
+                    checkConnect =false;
+                    return;
                 }
                 default:
                     showMessage("\nInvalid Command!\n");
@@ -392,12 +430,13 @@ public class CommandSFTP {
      * Handles remote file and directory menu system for remote management
      */
     private void remoteSFTPMenu() {
-        if (!checkConnected()) {
+        if (!checkConnect) {
+            this.quit();
             return;
         }
 
         //TODO(gelever): Finish up these calls.
-        while(true) {
+        while(checkConnect) {
             int userInput = CommandMenu.showManageMenu("Remote");
             switch(userInput) {
                 case 1: {
@@ -412,7 +451,11 @@ public class CommandSFTP {
                 } break;
                 case 4: {
                     return;
-
+                }
+                case 5: {
+                    showMessage("Server Disconnected! \n");
+                    this.quit();
+                    return;
                 }
                 default:
                     showMessage("\nInvalid Command!\n");
@@ -425,12 +468,13 @@ public class CommandSFTP {
      * Handles remote file permissions menu system for remote management
      */
     private void remoteSFTPPermissionMenu() {
-        if (!checkConnected()) {
+        if (!checkConnect) {
+            this.quit();
             return;
         }
 
         //TODO(gelever): Finish up these calls.
-        while(true) {
+        while(checkConnect) {
             int userInput = CommandMenu.showRemotePermissionsMenu();
             switch(userInput) {
                 case 1: {
@@ -440,6 +484,11 @@ public class CommandSFTP {
 
                 } break;
                 case 3: {
+                    return;
+                }
+                case 4: {
+                    showMessage("Server Disconnected! \n");
+                    checkConnect =false;
                     return;
                 }
                 default:
@@ -455,12 +504,12 @@ public class CommandSFTP {
      * Handles local file menu system for local file management.
      */
     private void localSFTPMenu() {
-        if (!checkConnected()) {
+        if (!checkConnect) {
             return;
         }
 
         //TODO(gelever): Finish up these calls.
-        while(true) {
+        while(checkConnect) {
             int userInput = CommandMenu.showManageMenu("Local");
             switch(userInput) {
                 case 1: {
@@ -476,6 +525,11 @@ public class CommandSFTP {
                     localPermissionSFTPMenu();
                 } break;
                 case 4: {
+                    return;
+                }
+                case 5: {
+                    showMessage("Server Disconnected! \n");
+                    checkConnect =false;
                     return;
                 }
                 default:
@@ -982,6 +1036,8 @@ public class CommandSFTP {
             this.isConnected = false;
             return true;
         }
+        this.channel.quit();
+        this.session.disconnect();
         return false;
     }
 

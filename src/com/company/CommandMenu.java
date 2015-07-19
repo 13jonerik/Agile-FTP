@@ -17,7 +17,7 @@ public class CommandMenu {
                 "Remote File Management",
                         "Local File Management",
                         "Options",
-                        "Quit"
+                        "Disconnect from Server"
         });
     }
 
@@ -27,6 +27,7 @@ public class CommandMenu {
                         "Directory Management",
                         "Permission Management",
                         "SFTP Menu",
+                        "Disconnect from Server",
 
         });
     }
@@ -40,7 +41,8 @@ public class CommandMenu {
                 "Create Directory",
                 "Delete Directory",
                 "Rename Directory",
-                location + " Menu"
+                location + " Menu",
+                "Disconnect from Server",
         });
     }
 
@@ -50,7 +52,8 @@ public class CommandMenu {
                 "Option",
                 "Option",
                 "More Option",
-                "Local Menu"
+                "Local Menu",
+                "Disconnect from Server"
         });
     }
     public static int showRemoteFileMenu() {
@@ -59,7 +62,8 @@ public class CommandMenu {
                 "Download File from Remote Directory",
                 "Download Multiple Files",
                 "Delete File from Remote Directory",
-                "Remote Menu" });
+                "Remote Menu",
+                "Disconnect from Server" });
     }
 
     public static int showOptionsMenu() {
@@ -69,6 +73,7 @@ public class CommandMenu {
                 "More Option",
                 "More Option",
                 "SFTP Menu",
+                "Disconnect from Server",
         });
     }
 
@@ -79,15 +84,21 @@ public class CommandMenu {
                 "Option",
                 "More Option",
                 "More Option",
-                "Remote Menu"
+                "Remote Menu",
+                "Disconnect from Server"
         });
     }
 
     public static int processMenu(String title, String [] options) {
+
         System.out.println("\n" +title +":");
         for (int i = 0; i < options.length; ++i) {
-                System.out.println("\t" + (i + 1) + "." + " " + options[i]);
-        }
+                if (i + 1 == options.length) {
+                    System.out.println("\n\t" + (i + 1) + "." + " " + options[i]);
+                }
+                else {
+                    System.out.println("\t" + (i + 1) + "." + " " + options[i]); }
+                }
         while(true) {
             Scanner sc = new Scanner(System.in);
             String userString = sc.nextLine();

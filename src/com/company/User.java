@@ -2,6 +2,7 @@ package com.company;
 
 import com.jcraft.jsch.UserInfo;
 
+
 import java.io.Console;
 import java.util.Scanner;
 
@@ -85,7 +86,7 @@ public class User implements UserInfo {
      * @param s message string required by UserInfo.  Not used.
      * @return True is valid password, false otherwise.
      */
-    @Override
+
     public boolean promptPassword(String s) {
         return promptPassword();
     }
