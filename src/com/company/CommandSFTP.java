@@ -892,9 +892,8 @@ public class CommandSFTP {
                 fileName = this.knownHostsFile;
             }
             try {
-                if (fileName.startsWith("~")) {
+                if (fileName.startsWith("~/")) {
                     fileName = System.getProperty("user.home") + fileName.subSequence(1, fileName.length() );
-                    System.out.println(fileName);
                 }
                 File file = new File(fileName);
                 File directory = new File(file.getParentFile().getAbsolutePath());
