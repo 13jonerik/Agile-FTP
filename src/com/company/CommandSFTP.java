@@ -681,10 +681,6 @@ public class CommandSFTP {
         if (!checkConnected()) {
             return;
         }
-        //Checks if file already exists and offers the user to overwrite.
-        if(!overWriteLocalFile(fileName)) {
-            return;
-        }
         try {
             this.channel.get(fileName, fileName);
             File putFile = new File(this.localCurrentDirectory + "/" + fileName);
@@ -704,7 +700,11 @@ public class CommandSFTP {
     private void getRemoteFile() {
         showMessage("File Name: ");
         String userInput = sc.nextLine();
-        getRemoteFile(userInput);
+
+        //Checks if file already exists and offers the user to overwrite.
+        if(overWriteLocalFile(userInput)) {
+            getRemoteFile(userInput);
+        }
     }
 
     /**
