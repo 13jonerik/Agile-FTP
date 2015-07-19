@@ -4,6 +4,8 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
+
+
 import static org.junit.Assert.assertEquals;
 
 /**
@@ -60,6 +62,7 @@ public class CommandSFTPTest {
 
       boolean success = validCommand.connect();
       assertEquals(true, success);
+      //assert=
       validCommand.quit();
    }
 
