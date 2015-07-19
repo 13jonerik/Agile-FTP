@@ -51,7 +51,6 @@ public class CommandMockTests {
      */
     @Test
     public void testIsNotConnected() throws Exception {
-//TODO: Test goes here...
         assertEquals(false, validCommand.isConnected());
     }
 
@@ -60,7 +59,6 @@ public class CommandMockTests {
      */
     @Test
     public void testIsConnected() throws Exception {
-//TODO: Test goes here...
         validCommand.connect();
         assertEquals(true, validCommand.isConnected());
     }
@@ -70,7 +68,6 @@ public class CommandMockTests {
      */
     @Test
     public void testConnect() throws Exception {
-//TODO: Test goes here...
 
         boolean success = validCommand.connect();
         assertEquals(true, success);
@@ -83,8 +80,6 @@ public class CommandMockTests {
      */
     @Test
     public void testQuit() throws Exception {
-//TODO: Test goes here...
-
         validCommand.connect();
         boolean success = validCommand.quit();
 
@@ -96,7 +91,6 @@ public class CommandMockTests {
      */
     @Test
     public void testIsValid() throws Exception {
-//TODO: Test goes here...
         assertEquals(true, validCommand.isValid());
         assertEquals(false, invalidCommand.isValid());
     }
@@ -257,6 +251,8 @@ public class CommandMockTests {
 
         file.delete();
     }
+
+
 
     @Test
     public void testChangeRemoteDirectory() throws Exception {
