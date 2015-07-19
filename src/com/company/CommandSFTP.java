@@ -510,7 +510,45 @@ public class CommandSFTP {
     }
 
     /**
-     * Renames a remote directory.
+     * Renames a remote directory or file.
+     * @param oldName name of directory or file to be renamed
+     * @param newName what to rename the directory or file
+     */
+    private void renameRemote(String oldName, String newName) {
+        //TODO(gelever): implement this.
+
+        if (!checkConnected()) {
+            return;
+        }
+
+        try {
+            channel.rename(oldName, newName);
+        }
+        catch (SftpException e) {
+            showMessage("Unable to Rename!");
+        }
+
+
+
+    }
+    /**
+     * Prompts the user to rename a remote file.
+     */
+    private void renameRemoteFile() {
+        //TODO(gelever): implement this.
+
+        if (!checkConnected()) {
+            return;
+        }
+        showMessage("File to rename: ");
+        String oldFileName = sc.nextLine();
+
+        showMessage("New File Name: ");
+        String newFileName = sc.nextLine();
+        renameRemote(oldFileName, newFileName);
+    }
+    /**
+     * Prompts the user to rename a remote directory.
      */
     private void renameRemoteDirectory() {
         //TODO(gelever): implement this.
@@ -518,6 +556,12 @@ public class CommandSFTP {
         if (!checkConnected()) {
             return;
         }
+        showMessage("Directory to rename: ");
+        String oldFileName = sc.nextLine();
+
+        showMessage("New Directory Name: ");
+        String newFileName = sc.nextLine();
+        renameRemote(oldFileName, newFileName);
     }
 
     /**
@@ -674,7 +718,7 @@ public class CommandSFTP {
     }
 
     /**
-     * Retrieves a file from the current local directory.
+     * Retrieves a file from the current remote directory.
      * @param fileName File to receive.
      */
     private void getRemoteFile(String fileName) {
@@ -739,7 +783,7 @@ public class CommandSFTP {
      */
     private void createRemoteDir() {
         showMessage("Directory to create: ");
-       createRemoteDir(sc.nextLine());
+        createRemoteDir(sc.nextLine());
     }
 
     /**

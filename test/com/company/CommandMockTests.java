@@ -143,6 +143,7 @@ public class CommandMockTests {
         BufferedReader br = new BufferedReader(new FileReader(file));
         String addedToHost = br.readLine();
         assertEquals(addedToHost, this.host + " ssh-rsa " + "key");
+        br.close();
         file.delete();
 
     }
@@ -257,12 +258,12 @@ public class CommandMockTests {
     @Test
     public void testChangeRemoteDirectory() throws Exception {
         validCommand.connect();
-        Method methodChangeDir = validCommand.getClass().getDeclaredMethod("changeRemoteDirectory", String.class);
+        Method methodChangeFile = validCommand.getClass().getDeclaredMethod("changeRemoteDirectory", String.class);
         Method methodListDir = validCommand.getClass().getDeclaredMethod("listCurrentRemoteDirectory");
-        Method methodCreate = validCommand.getClass().getDeclaredMethod("createRemoteDir", String.class);
-        Method methodDelete = validCommand.getClass().getDeclaredMethod("deleteRemoteDirectory", String.class);
+        Method methodCreate = validCommand.getClass().getDeclaredMethod("uploadRemoteFile", String.class);
+        Method methodDelete = validCommand.getClass().getDeclaredMethod("deleteRemoteFile", String.class);
 
-        methodChangeDir.setAccessible(true);
+        methodChangeFile.setAccessible(true);
         methodListDir.setAccessible(true);
         methodCreate.setAccessible(true);
         methodDelete.setAccessible(true);
@@ -271,13 +272,85 @@ public class CommandMockTests {
 
         String testDir = "TESTDIRECTORY";
         methodCreate.invoke(this.validCommand, testDir);
-        methodChangeDir.invoke(this.validCommand, testDir);
+        methodChangeFile.invoke(this.validCommand, testDir);
         methodListDir.invoke(this.validCommand);
 
         assertEquals(outContent.toString().contains(testDir), true);
 
-        methodChangeDir.invoke(this.validCommand, "..");
+        methodChangeFile.invoke(this.validCommand, "..");
         methodDelete.invoke(this.validCommand, testDir);
+
+    }
+
+    @Test
+    public void testRenameFile() throws Exception {
+        validCommand.connect();
+        Method methodRename = validCommand.getClass().getDeclaredMethod("renameRemote", String.class, String.class);
+        Method methodListDir = validCommand.getClass().getDeclaredMethod("listCurrentRemoteFiles");
+        Method methodCreate = validCommand.getClass().getDeclaredMethod("uploadRemoteFile", String.class);
+        Method methodDelete = validCommand.getClass().getDeclaredMethod("deleteRemoteFile", String.class);
+
+        methodCreate.setAccessible(true);
+        methodDelete.setAccessible(true);
+        methodRename.setAccessible(true);
+        methodListDir.setAccessible(true);
+
+        String testFile = "TESTFILEUPLOAD";
+        File file = new File(System.getProperty("user.home") + "/" + testFile);
+        file.createNewFile();
+        boolean exists = file.exists();
+        assertEquals(exists, true);
+        String newTestFileName = "NEWTESTFile";
+        outContent.reset();
+
+        methodCreate.invoke(this.validCommand, testFile);
+        methodListDir.invoke(this.validCommand);
+        assertEquals(outContent.toString().contains(testFile), true);
+
+        outContent.reset();
+        methodRename.invoke(this.validCommand, testFile, newTestFileName);
+        methodListDir.invoke(this.validCommand);
+        assertEquals(outContent.toString().contains(newTestFileName), true);
+        assertEquals(outContent.toString().contains(testFile), false);
+
+        outContent.reset();
+        methodDelete.invoke(this.validCommand, newTestFileName);
+        methodListDir.invoke(this.validCommand);
+        assertEquals(outContent.toString().contains(newTestFileName), false);
+
+        file.delete();
+
+    }
+    @Test
+    public void testRenameDirectory() throws Exception {
+        validCommand.connect();
+        Method methodRename = validCommand.getClass().getDeclaredMethod("renameRemote", String.class, String.class);
+        Method methodListDir = validCommand.getClass().getDeclaredMethod("listCurrentRemoteFiles");
+        Method methodCreate = validCommand.getClass().getDeclaredMethod("createRemoteDir", String.class);
+        Method methodDelete = validCommand.getClass().getDeclaredMethod("deleteRemoteDirectory", String.class);
+
+        methodCreate.setAccessible(true);
+        methodDelete.setAccessible(true);
+        methodRename.setAccessible(true);
+        methodListDir.setAccessible(true);
+
+        String testDir = "TESTDIRECTORY";
+        String newTestDirName = "NEWTESTDIR";
+        outContent.reset();
+
+        methodCreate.invoke(this.validCommand, testDir);
+        methodListDir.invoke(this.validCommand);
+        assertEquals(outContent.toString().contains(testDir), true);
+
+        outContent.reset();
+        methodRename.invoke(this.validCommand, testDir, newTestDirName);
+        methodListDir.invoke(this.validCommand);
+        assertEquals(outContent.toString().contains(newTestDirName), true);
+
+        outContent.reset();
+        methodDelete.invoke(this.validCommand, newTestDirName);
+        methodListDir.invoke(this.validCommand);
+        assertEquals(outContent.toString().contains(newTestDirName), false);
 
     }
 
