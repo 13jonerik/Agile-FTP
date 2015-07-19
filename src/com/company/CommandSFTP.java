@@ -577,7 +577,9 @@ public class CommandSFTP {
      * @param fileName directory to change into.
      */
     private void changeRemoteDirectory(String fileName) {
-        checkConnected();
+        if (!checkConnected()) {
+            return;
+        }
         try {
             this.channel.cd(fileName);
         }
@@ -612,7 +614,9 @@ public class CommandSFTP {
      * Lists the current remote working directory.
      */
     private void listCurrentRemoteDirectory() {
-        checkConnected();
+        if (!checkConnected()) {
+            return;
+        }
         try {
             System.out.println(this.channel.pwd());
         }
@@ -656,7 +660,9 @@ public class CommandSFTP {
      * @param localDirectory The current local directory.
      */
     private void listCurrentLocalDirectoryFiles(String localDirectory) {
-        checkConnected();
+        if (!checkConnected()) {
+            return;
+        }
         Path directory = Paths.get(localDirectory);
 
         try (DirectoryStream<Path> stream = Files.newDirectoryStream(directory, "*")){
@@ -674,7 +680,9 @@ public class CommandSFTP {
      * @param fileName File to receive.
      */
     private void getRemoteFile(String fileName) {
-        checkConnected();
+        if (!checkConnected()) {
+            return;
+        }
         //Checks if file already exists and offers the user to overwrite.
         if(!overWriteLocalFile(fileName)) {
             return;
@@ -717,7 +725,9 @@ public class CommandSFTP {
      * @param dirName Name of new directory.
      */
     private void createRemoteDir(String dirName) {
-        checkConnected();
+        if (!checkConnected()) {
+            return;
+        }
         try {
             this.channel.mkdir(dirName);
         }
@@ -739,7 +749,10 @@ public class CommandSFTP {
      * @param fileName file to delete.
      */
     private void deleteRemoteDirectory(String fileName) {
-        checkConnected();
+        if (!checkConnected()) {
+            return;
+        }
+
         try {
             this.channel.rmdir(fileName);
         }
@@ -761,7 +774,9 @@ public class CommandSFTP {
      * @param timeout time to set for timeout.
      */
     private void setTimeout(int timeout) {
-        checkConnected();
+        if (!checkConnected()) {
+            return;
+        }
         //TODO(gelever): find out what units these are.  ms?
         try {
             this.session.setTimeout(timeout);
