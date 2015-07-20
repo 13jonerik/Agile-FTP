@@ -98,7 +98,7 @@ public class User implements UserInfo {
     public boolean promptPassword() {
         showMessage("Password:");
 
-        //TODO(gelever): possibly use password masking? so it doesn't show up on CLI
+        //TODO(gelever): test this from command line
         //Modified from https://docs.oracle.com/javase/7/docs/api/java/io/Console.html#readPassword%28%29
         Console cons;
         char[] passwd;

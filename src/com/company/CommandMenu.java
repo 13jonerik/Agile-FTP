@@ -48,20 +48,21 @@ public class CommandMenu {
 
     public static int showLocalFileMenu() {
         return processMenu("Local File Menu", new String[] {
-                "Rename File",
-                "Option",
-                "Option",
-                "More Option",
-                "Local Menu",
+                "List Current Directory",
+                "Change Current Directory",
+                "List Local Files",
+                "Rename Local File",
+                "SFTP Menu",
                 "Disconnect from Server"
         });
     }
     public static int showRemoteFileMenu() {
         return processMenu("Remote File Menu", new String[] {
                 "Upload File to Remote Directory",
-                "Download File from Remote Directory",
-                "Download Multiple Files",
+                "Download Files from Remote Directory",
                 "Delete File from Remote Directory",
+                "List Files in Current Directory",
+                "Rename File",
                 "Remote Menu",
                 "Disconnect from Server" });
     }
@@ -94,32 +95,21 @@ public class CommandMenu {
         System.out.println("\n" +title +":");
         for (int i = 0; i < options.length; ++i) {
                 if (i + 1 == options.length) {
-                    System.out.println("\n\t" + (i + 1) + "." + " " + options[i]);
+                    System.out.println("\n\t" + "0." + " " + options[i]);
                 }
                 else {
                     System.out.println("\t" + (i + 1) + "." + " " + options[i]); }
                 }
-        while(true) {
-            Scanner sc = new Scanner(System.in);
-            String userString = sc.nextLine();
-            int userInput;
-            try {
-                userInput = Integer.parseInt(userString);
-
-            }
-            catch (NumberFormatException e) {
-                System.out.println("Invalid Input!\n");
-                continue;
-            }
-
-            if (userInput > 0 && userInput <= options.length) {
-                return userInput;
-            }
-            else {
-                System.out.println("Invalid Input!\n");
-            }
-
+        Scanner sc = new Scanner(System.in);
+        String userString = sc.nextLine();
+        int userInput;
+        try {
+            userInput = Integer.parseInt(userString);
         }
+        catch (NumberFormatException e) {
+            return -1;
+        }
+        return userInput;
 
     }
 }

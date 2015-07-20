@@ -40,17 +40,17 @@ public class CommandSFTPTest {
    @Test
    public void testIsNotConnected() throws Exception {
 //TODO: Test goes here...
-      assertEquals(false, validCommand.isConnected());
+      assertEquals(false, validCommand.checkConnect());
    }
 
    /**
-    * Method: isConnected()
+    * Method: checkConnect()
     */
    @Test
    public void testIsConnected() throws Exception {
 //TODO: Test goes here...
       validCommand.connect();
-      assertEquals(true, validCommand.isConnected());
+      assertEquals(true, validCommand.checkConnect());
    }
 
    /**

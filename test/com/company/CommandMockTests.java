@@ -6,6 +6,10 @@ import org.junit.Test;
 
 import java.io.*;
 import java.lang.reflect.Method;
+import java.nio.file.DirectoryStream;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 
 import static org.junit.Assert.assertEquals;
 
@@ -23,8 +27,8 @@ public class CommandMockTests {
     private CommandSFTP validCommand;
     private CommandSFTP invalidCommand;
     private String host = "linux.cecs.pdx.edu";
-    private String user = "USER";
-    private String password = "PASSWORD";
+    private String user = "user";
+    private String password = "password";
 
 
     @Before
@@ -51,16 +55,16 @@ public class CommandMockTests {
      */
     @Test
     public void testIsNotConnected() throws Exception {
-        assertEquals(false, validCommand.isConnected());
+        assertEquals(false, validCommand.checkConnect());
     }
 
     /**
-     * Method: isConnected()
+     * Method: checkConnect()
      */
     @Test
     public void testIsConnected() throws Exception {
         validCommand.connect();
-        assertEquals(true, validCommand.isConnected());
+        assertEquals(true, validCommand.checkConnect());
     }
 
     /**
@@ -97,7 +101,7 @@ public class CommandMockTests {
 
     @Test
     public void testCheckConnected() throws Exception {
-        method = validCommand.getClass().getDeclaredMethod("checkConnected");
+        method = validCommand.getClass().getDeclaredMethod("checkConnect");
         method.setAccessible(true);
         Boolean result;
         result = (Boolean) method.invoke(invalidCommand);
@@ -162,18 +166,20 @@ public class CommandMockTests {
         validCommand.connect();
 
         String testFile = "testFileRemote.txt";
-        File file = new File(System.getProperty("user.home") + "/" + testFile);
+        File file = new File(testFile);
         file.createNewFile();
-        boolean exists = file.exists();
-        assertEquals(exists, true);
+        assertEquals(file.exists(), true);
 
         methodUpload.invoke(validCommand, testFile);
+        outContent.reset();
         methodList.invoke(validCommand);
 
         assertEquals(outContent.toString().contains(testFile), true);
         assertEquals(outContent.toString().contains("NOTREAL.txt"), false);
 
         methodDelete.invoke(validCommand, testFile);
+
+        file.delete();
 
 
     }
@@ -203,6 +209,7 @@ public class CommandMockTests {
         String testDirectory = "TESTDIRECTORY";
 
         methodCreate.invoke(validCommand, testDirectory);
+        outContent.reset();
         methodList.invoke(validCommand);
 
         assertEquals(outContent.toString().contains(testDirectory), true);
@@ -228,12 +235,14 @@ public class CommandMockTests {
         methodDelete.setAccessible(true);
 
         String testFile = "testUploadFile.txt";
-        File file = new File(System.getProperty("user.home") + "/" + testFile);
+        File file = new File(testFile);
         file.createNewFile();
         boolean exists = file.exists();
         assertEquals(exists, true);
 
         methodUpload.invoke(validCommand, testFile);
+
+        outContent.reset();
         methodList.invoke(validCommand);
 
         assertEquals(outContent.toString().contains(testFile), true);
@@ -260,8 +269,8 @@ public class CommandMockTests {
         validCommand.connect();
         Method methodChangeFile = validCommand.getClass().getDeclaredMethod("changeRemoteDirectory", String.class);
         Method methodListDir = validCommand.getClass().getDeclaredMethod("listCurrentRemoteDirectory");
-        Method methodCreate = validCommand.getClass().getDeclaredMethod("uploadRemoteFile", String.class);
-        Method methodDelete = validCommand.getClass().getDeclaredMethod("deleteRemoteFile", String.class);
+        Method methodCreate = validCommand.getClass().getDeclaredMethod("createRemoteDir", String.class);
+        Method methodDelete = validCommand.getClass().getDeclaredMethod("deleteRemoteDirectory", String.class);
 
         methodChangeFile.setAccessible(true);
         methodListDir.setAccessible(true);
@@ -273,6 +282,8 @@ public class CommandMockTests {
         String testDir = "TESTDIRECTORY";
         methodCreate.invoke(this.validCommand, testDir);
         methodChangeFile.invoke(this.validCommand, testDir);
+
+        outContent.reset();
         methodListDir.invoke(this.validCommand);
 
         assertEquals(outContent.toString().contains(testDir), true);
@@ -283,7 +294,7 @@ public class CommandMockTests {
     }
 
     @Test
-    public void testRenameFile() throws Exception {
+    public void testRenameRemoteFile() throws Exception {
         validCommand.connect();
         Method methodRename = validCommand.getClass().getDeclaredMethod("renameRemote", String.class, String.class);
         Method methodListDir = validCommand.getClass().getDeclaredMethod("listCurrentRemoteFiles");
@@ -296,14 +307,15 @@ public class CommandMockTests {
         methodListDir.setAccessible(true);
 
         String testFile = "TESTFILEUPLOAD";
-        File file = new File(System.getProperty("user.home") + "/" + testFile);
+        File file = new File(testFile);
         file.createNewFile();
         boolean exists = file.exists();
         assertEquals(exists, true);
         String newTestFileName = "NEWTESTFile";
-        outContent.reset();
 
         methodCreate.invoke(this.validCommand, testFile);
+
+        outContent.reset();
         methodListDir.invoke(this.validCommand);
         assertEquals(outContent.toString().contains(testFile), true);
 
@@ -336,9 +348,10 @@ public class CommandMockTests {
 
         String testDir = "TESTDIRECTORY";
         String newTestDirName = "NEWTESTDIR";
-        outContent.reset();
 
         methodCreate.invoke(this.validCommand, testDir);
+
+        outContent.reset();
         methodListDir.invoke(this.validCommand);
         assertEquals(outContent.toString().contains(testDir), true);
 
@@ -352,6 +365,25 @@ public class CommandMockTests {
         methodListDir.invoke(this.validCommand);
         assertEquals(outContent.toString().contains(newTestDirName), false);
 
+    }
+
+    @Test
+    public void testRenameLocalFile() throws Exception {
+        validCommand.connect();
+        Method methodRename = validCommand.getClass().getDeclaredMethod("renameLocalFile", String.class, String.class);
+        methodRename.setAccessible(true);
+
+        String testFileName = "TESTFILENAME";
+        String newFileName = "NEWFILENAME";
+        File testFile = new File(testFileName);
+        testFile.createNewFile();
+        assertEquals(testFile.exists(), true);
+
+        methodRename.invoke(this.validCommand, testFileName, newFileName);
+        assertEquals(new File(newFileName).exists(), true);
+        assertEquals(new File(testFileName).exists(), false);
+
+        new File(newFileName).delete();
     }
 
 

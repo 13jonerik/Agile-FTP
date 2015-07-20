@@ -20,19 +20,20 @@ public class CommandSFTP {
     private String knownHostsFile = "";
     private int portNumber;
     private final String [] hostChecking = {"StrictHostKeyChecking", "yes"};
-    private boolean isConnected = false;
     private User user = null;
 
     private JSch jsch = null;
     private Session session = null;
     private ChannelSftp channel = null;
-    private static final int timeout = 10000;
-    private boolean fileDisplay = false;
-    private boolean checkConnect = true;
 
-    private String localCurrentDirectory = System.getProperty("user.home");
+    private static final int timeout = 10000;
+
+    private boolean fileDisplay = false;
+    private boolean checkConnect = false;
+
 
     private static Scanner sc = new Scanner(System.in);
+
 
     /**
      * Default constructor.
@@ -42,6 +43,7 @@ public class CommandSFTP {
         JSch.setConfig(hostChecking[0], hostChecking[1]);
         this.portNumber = 22;
     }
+
 
     /**
      * Constructor that sets all parameters necessary to connect
@@ -58,20 +60,22 @@ public class CommandSFTP {
         this.knownHostsFile = knownHostsFile;
     }
 
+
     /**
      * Returns whether or not the user is currently connected.
      * @return true if connected, false otherwise.
      */
-    public boolean isConnected() {
-        return this.isConnected;
+    public boolean checkConnect() {
+        return this.checkConnect;
     }
+
 
     /**
      * Prompts user to enter server information.
      */
-
     public void promptInfo() {
-        checkConnect = true;                     //reset to true so user can log back in from main menu
+        //NOTE(gelever): should this be set after a successful connection?
+        //checkConnect = true;                     //reset to true so user can log back in from main menu
         showMessage("Host IP: ");
         this.hostIP = sc.nextLine();
 
@@ -84,16 +88,13 @@ public class CommandSFTP {
                 this.portNumber = 22;
                 break;
             }
-
             try {
-               userInput = Integer.parseInt(userString);
-
+                userInput = Integer.parseInt(userString);
             }
             catch (NumberFormatException e) {
                 showMessage("Positive Integers Only!\n");
                 continue;
             }
-
             if (userInput > 0 && userInput < 65536) {
                 this.portNumber = userInput;
                 break;
@@ -101,18 +102,15 @@ public class CommandSFTP {
             else {
                 showMessage("Positive Integers Only!\n");
             }
-
         }
-
         showMessage("KnownHosts File (~/.ssh/sftp_hosts): ");
         this.knownHostsFile = sc.nextLine();
-
-
     }
+
 
     /**
      * Sets the user information
-      * @param user holds user information
+     * @param user holds user information
      */
     public void setUser(User user) {
         this.user = user;
@@ -128,20 +126,16 @@ public class CommandSFTP {
                 this.user.validUser() && this.isValid())) {
             return false;
         }
-
         if(!setKnownHostsFile(this.knownHostsFile)) {
             return false;
         }
-
-
         if (!(setSession(this.user) && connectSession(this.user) && channelConnect())) {
             return false;
         }
-        this.isConnected = true;
-
+        this.checkConnect = true;
         return true;
-
     }
+
 
     /**
      * Requests a session from jsch with the server information and sets the user password.
@@ -149,7 +143,6 @@ public class CommandSFTP {
      * @return true on success, false otherwise
      */
     private boolean setSession(User user) {
-
         try {
             this.session = this.jsch.getSession(user.getUserName(), this.hostIP, this.portNumber);
             this.session.setPassword(user.getPassword());
@@ -162,12 +155,12 @@ public class CommandSFTP {
         return true;
     }
 
+
     /**
      * Connects the channel to the current session.
      * @return true on success, false otherwise.
      */
     private boolean channelConnect() {
-
         try {
             this.channel = (ChannelSftp)this.session.openChannel("sftp");
             this.channel.connect(timeout);
@@ -178,6 +171,7 @@ public class CommandSFTP {
         }
         return true;
     }
+
 
     /**
      * Attempts to correct the current session.
@@ -245,41 +239,32 @@ public class CommandSFTP {
                 }
             }
         }
-       return true;
+        return true;
     }
+
 
     /**
      * Handles SFTP Menu user input.
      */
     public void mainSFTPMenu() {
-
-        if (!checkConnect) {
-            this.quit();
-            return;
-        }
-        while(checkConnect) {
+        while(checkConnect()) {
             int userInput = CommandMenu.showMainSFTPMenu();
             switch(userInput) {
                 case 1: {
                     remoteSFTPMenu();
-
                 } break;
                 case 2: {
                     localSFTPMenu();
-
                 } break;
                 case 3: {
                     optionsSFTPMenu();
-
                 } break;
-                case 4: {
-                    showMessage("Server Disconnected! \n");
-                    checkConnect =false;
+                case 0: {
+                    this.quit();
                     return;
-
                 }
                 default:
-                    showMessage("\nInvalid Command!\n");
+                    showMessage("Invalid Command!\n");
             }
         }
 
@@ -290,37 +275,27 @@ public class CommandSFTP {
      * Handles options menu system.
      */
     private void optionsSFTPMenu() {
-        if (!checkConnect) {
-            this.quit();
-            return;
-        }
-        while(checkConnect) {
+        while(checkConnect()) {
             int userInput = CommandMenu.showOptionsMenu();
             switch(userInput) {
                 case 1: {
-                   setTimeout();
-
+                    setTimeout();
                 } break;
                 case 2: {
                     setFileDisplay();
-
                 } break;
                 case 3: {
                     showMessage("MORE OPTIONS");
-
                 } break;
                 case 4: {
                     showMessage("MORE OPTIONS");
-
                 } break;
                 case 5: {
                     return;
                 }
-                case 6: {
-                    showMessage("Server Disconnected! \n");
-                    checkConnect =false;
+                case 0: {
+                    this.quit();
                     return;
-
                 }
                 default:
                     showMessage("\nInvalid Command!\n");
@@ -329,51 +304,37 @@ public class CommandSFTP {
 
     }
 
+
     /**
      * Handles remote directory menu system for remote management
      */
     private void remoteSFTPDirMenu() {
-        if (!checkConnect) {
-            this.quit();
-            return;
-        }
-
-        //TODO(gelever): Finish up these calls.
-        while(checkConnect) {
+        while(checkConnect()) {
             int userInput = CommandMenu.showDirectoryMenu("Remote");
             switch(userInput) {
                 case 1: {
                     listCurrentRemoteDirectory();
-
                 } break;
                 case 2: {
                     listCurrentRemoteFiles();
-
                 } break;
                 case 3: {
                     changeRemoteDirectory();
-
                 } break;
                 case 4: {
                     createRemoteDir();
-
                 } break;
                 case 5: {
-                    //TODO(): Make sure this works for directories
                     deleteRemoteDirectory();
-
                 } break;
                 case 6: {
-                   //TODO(): Implement this
                     renameRemoteDirectory();
-
                 } break;
                 case 7: {
                     return;
                 }
-                case 8: {
-                    showMessage("Server Disconnected! \n");
-                    checkConnect =false;
+                case 0: {
+                    this.quit();
                     return;
                 }
                 default:
@@ -387,60 +348,47 @@ public class CommandSFTP {
      * Handles remote file menu system for remote management
      */
     private void remoteSFTPFileMenu() {
-        if (!checkConnect) {
-            this.quit();
-            return;
-        }
-
-        while(checkConnect) {
+        while(checkConnect()) {
             int userInput = CommandMenu.showRemoteFileMenu();
             switch(userInput) {
                 case 1: {
                     uploadRemoteFile();
-
                 } break;
                 case 2: {
-                    getRemoteFile();
-
+                    getMultipleRemote();
                 } break;
                 case 3: {
-                    getMultipleRemote();
-
+                    deleteRemoteFile();
                 } break;
                 case 4: {
-                    deleteRemoteFile();
-
+                    listCurrentRemoteFiles();
                 } break;
                 case 5: {
-                    return;
+                    renameRemoteFile();
                 }
                 case 6: {
-                    showMessage("Server Disconnected! \n");
-                    checkConnect =false;
+                    return;
+                }
+                case 0: {
+                    this.quit();
                     return;
                 }
                 default:
                     showMessage("\nInvalid Command!\n");
             }
         }
-
     }
 
     /**
      * Handles remote file and directory menu system for remote management
      */
     private void remoteSFTPMenu() {
-        if (!checkConnect) {
-            this.quit();
-            return;
-        }
-
         //TODO(gelever): Finish up these calls.
-        while(checkConnect) {
+        while(checkConnect()) {
             int userInput = CommandMenu.showManageMenu("Remote");
             switch(userInput) {
                 case 1: {
-                   remoteSFTPFileMenu();
+                    remoteSFTPFileMenu();
                 } break;
                 case 2: {
                     remoteSFTPDirMenu();
@@ -452,9 +400,8 @@ public class CommandSFTP {
                 case 4: {
                     return;
                 }
-                case 5: {
-                    showMessage("Server Disconnected! \n");
-                    checkConnect = false;
+                case 0: {
+                    this.quit();
                     return;
                 }
                 default:
@@ -468,13 +415,8 @@ public class CommandSFTP {
      * Handles remote file permissions menu system for remote management
      */
     private void remoteSFTPPermissionMenu() {
-        if (!checkConnect) {
-            this.quit();
-            return;
-        }
-
         //TODO(gelever): Finish up these calls.
-        while(checkConnect) {
+        while(checkConnect()) {
             int userInput = CommandMenu.showRemotePermissionsMenu();
             switch(userInput) {
                 case 1: {
@@ -486,9 +428,8 @@ public class CommandSFTP {
                 case 3: {
                     return;
                 }
-                case 4: {
-                    showMessage("Server Disconnected! \n");
-                    checkConnect =false;
+                case 0: {
+                    this.quit();
                     return;
                 }
                 default:
@@ -504,32 +445,27 @@ public class CommandSFTP {
      * Handles local file menu system for local file management.
      */
     private void localSFTPMenu() {
-        if (!checkConnect) {
-            return;
-        }
-
-        //TODO(gelever): Finish up these calls.
-        while(checkConnect) {
-            int userInput = CommandMenu.showManageMenu("Local");
+        while(checkConnect()) {
+            int userInput = CommandMenu.showLocalFileMenu();
             switch(userInput) {
                 case 1: {
-                    showMessage("NOT WORKING ATM");
-                    localFileSFTPMenu();
+                    listCurrentLocalDirectory();
                 } break;
                 case 2: {
-                    localDirSFTPMenu();
-                    showMessage("NOT WORKING ATM");
+                    changeCurrentLocalDirectory();
                 } break;
                 case 3: {
-                    showMessage("NOT WORKING ATM");
-                    localPermissionSFTPMenu();
+                    listCurrentLocalDirectoryFiles();
                 } break;
                 case 4: {
+                    //TODO(gelever): Implement this.
+                    renameLocalFile();
+                } break;
+                case 5: {
                     return;
                 }
-                case 5: {
-                    showMessage("Server Disconnected! \n");
-                    checkConnect =false;
+                case 0: {
+                    this.quit();
                     return;
                 }
                 default:
@@ -539,29 +475,37 @@ public class CommandSFTP {
 
     }
 
-    private void localPermissionSFTPMenu() {
-        //TODO(): IMPLEMENT THIS.
 
-        if (!checkConnected()) {
+    /**
+     * Renames a local file.
+     * @param oldName original file name
+     * @param newName new file name
+     */
+    private void renameLocalFile(String oldName, String newName) {
+        File oldFile = new File(this.channel.lpwd() + "/" + oldName);
+        File newFile = new File(this.channel.lpwd() + "/" + newName);
+        if(newFile.exists()) {
+            showMessage("\nNew File Name Already Exists!\n");
             return;
+        }
+        if(!oldFile.renameTo(newFile)) {
+            showMessage("\nUnable to Rename File\n");
         }
     }
 
-    private void localDirSFTPMenu() {
-        //TODO(): IMPLEMENT THIS.
 
-        if (!checkConnected()) {
-            return;
-        }
+    /**
+     * Prompts the user to rename a local file.
+      */
+    private void renameLocalFile() {
+        showMessage("File to Rename: ");
+        String oldFileName = sc.nextLine();
+
+        showMessage("New File Name: ");
+        String newFileName = sc.nextLine();
+        renameLocalFile(oldFileName, newFileName);
     }
 
-    private void localFileSFTPMenu() {
-        //TODO(): IMPLEMENT THIS.
-
-        if (!checkConnected()) {
-            return;
-        }
-    }
 
     /**
      * Renames a remote directory or file.
@@ -569,31 +513,19 @@ public class CommandSFTP {
      * @param newName what to rename the directory or file
      */
     private void renameRemote(String oldName, String newName) {
-        //TODO(gelever): implement this.
-
-        if (!checkConnected()) {
-            return;
-        }
-
         try {
             channel.rename(oldName, newName);
         }
         catch (SftpException e) {
             showMessage("Unable to Rename!");
         }
-
-
-
     }
+
+
     /**
      * Prompts the user to rename a remote file.
      */
     private void renameRemoteFile() {
-        //TODO(gelever): implement this.
-
-        if (!checkConnected()) {
-            return;
-        }
         showMessage("File to rename: ");
         String oldFileName = sc.nextLine();
 
@@ -601,15 +533,12 @@ public class CommandSFTP {
         String newFileName = sc.nextLine();
         renameRemote(oldFileName, newFileName);
     }
+
+
     /**
      * Prompts the user to rename a remote directory.
      */
     private void renameRemoteDirectory() {
-        //TODO(gelever): implement this.
-
-        if (!checkConnected()) {
-            return;
-        }
         showMessage("Directory to rename: ");
         String oldFileName = sc.nextLine();
 
@@ -618,6 +547,7 @@ public class CommandSFTP {
         renameRemote(oldFileName, newFileName);
     }
 
+
     /**
      * Prompts the user to delete a file.
      */
@@ -625,6 +555,7 @@ public class CommandSFTP {
         showMessage("File to Delete: ");
         deleteRemoteFile(sc.nextLine());
     }
+
 
     /**
      * Attempts to delete a remote file.
@@ -639,14 +570,14 @@ public class CommandSFTP {
         }
     }
 
+
     /**
      * Uploads file to current remote directory.
      * @param fileName file to upload
      */
     private void uploadRemoteFile(String fileName) {
-        //TODO: Test this more
         //TODO: Create overwrite prompt for remote file upload. is possible?
-        String absoluteFileName = this.localCurrentDirectory + "/" + fileName;
+        String absoluteFileName = this.channel.lpwd() + "/" + fileName;
         File testExists = new File(absoluteFileName);
         if(!testExists.exists()) {
             showMessage("Unable to Find Local File: " + fileName );
@@ -660,6 +591,7 @@ public class CommandSFTP {
         }
     }
 
+
     /**
      * Prompts the user to select file to upload to remote directory.
      */
@@ -668,14 +600,12 @@ public class CommandSFTP {
         uploadRemoteFile(sc.nextLine());
     }
 
+
     /**
      * changes the current remote directory.
      * @param fileName directory to change into.
      */
     private void changeRemoteDirectory(String fileName) {
-        if (!checkConnected()) {
-            return;
-        }
         try {
             this.channel.cd(fileName);
         }
@@ -684,6 +614,7 @@ public class CommandSFTP {
         }
     }
 
+
     /**
      * Prompts user to change remote directory.
      */
@@ -691,6 +622,7 @@ public class CommandSFTP {
         showMessage("Remote Directory: ");
         changeRemoteDirectory(sc.nextLine());
     }
+
 
     /**
      * Sets whether or not to display full file information.
@@ -706,91 +638,82 @@ public class CommandSFTP {
         }
     }
 
+
     /**
      * Lists the current remote working directory.
      */
     private void listCurrentRemoteDirectory() {
-        if (!checkConnected()) {
-            return;
-        }
         try {
             System.out.println(this.channel.pwd());
         }
         catch (SftpException je) {
-            //TODO(): Handle this more gracefully?
-            System.err.println("Error in Listing Directory: " + je);
-            //showMessage(je.toString());
+            showMessage("Error in Listing Directory!");
         }
     }
 
+
+    /**
+     * Changes the current local directory.
+     */
+    private void changeCurrentLocalDirectory(String directory) {
+       try {
+           this.channel.lcd(directory);
+       }
+       catch (SftpException e) {
+            showMessage("Unable to change local directory!");
+       }
+    }
     /**
      * Changes the current local directory.
      */
     private void changeCurrentLocalDirectory() {
         showMessage("Directory: ");
-        String userInput = sc.nextLine();
-
-        //Absolute path
-        if(new File(userInput).isDirectory() ) {
-            this.localCurrentDirectory = userInput;
-        }
-        //Relative path
-        else if(new File(this.localCurrentDirectory + "/" + userInput).isDirectory()) {
-            this.localCurrentDirectory = this.localCurrentDirectory + "/" + userInput;
-        }
-        else {
-            showMessage("Directory Not Found!");
-        }
-
+        changeCurrentLocalDirectory(sc.nextLine());
     }
+
 
     /**
      * Displays the current local directory.
      */
     private void listCurrentLocalDirectory() {
-        showMessage(this.localCurrentDirectory + "\n");
+        showMessage(this.channel.lpwd() + "\n");
     }
+
 
     /**
      * Shows all files and directories in current local directroy.
-     * @param localDirectory The current local directory.
      */
-    private void listCurrentLocalDirectoryFiles(String localDirectory) {
-        if (!checkConnected()) {
-            return;
-        }
-        Path directory = Paths.get(localDirectory);
-
+    private void listCurrentLocalDirectoryFiles() {
+        Path directory = Paths.get(this.channel.lpwd());
         try (DirectoryStream<Path> stream = Files.newDirectoryStream(directory, "*")){
             for (Path path : stream) {
-                System.out.println(path);
+                if (this.fileDisplay) {
+                    System.out.println(path);
+                }
+                else {
+                    System.out.println(path.getFileName());
+                }
             }
         }
         catch (IOException e) {
-            showMessage("Current Directory not found!");
+            showMessage("Current Local Directory Not Found!");
         }
     }
+
 
     /**
      * Retrieves a file from the current remote directory.
      * @param fileName File to receive.
      */
     private void getRemoteFile(String fileName) {
-        if (!checkConnected()) {
-            return;
-        }
         try {
             this.channel.get(fileName, fileName);
-            File putFile = new File(this.localCurrentDirectory + "/" + fileName);
-            Files.move(new File(fileName).toPath(), putFile.toPath(), StandardCopyOption.ATOMIC_MOVE);
-        }
-        catch (IOException e) {
-            showMessage("Unable to create local file!");
         }
         catch(SftpException e) {
             showMessage("Unable to retrieve remote file: " + fileName + "\n");
         }
     }
+
 
     /**
      * Prompts user to receive remote file.
@@ -805,6 +728,7 @@ public class CommandSFTP {
         }
     }
 
+
     /**
      * Prompts user to retrieve multiple remote files.
      */
@@ -816,21 +740,20 @@ public class CommandSFTP {
         }
     }
 
+
     /**
      * Creates a new remote directory in the current remote working directory.
      * @param dirName Name of new directory.
      */
     private void createRemoteDir(String dirName) {
-        if (!checkConnected()) {
-            return;
-        }
         try {
             this.channel.mkdir(dirName);
         }
         catch (SftpException e) {
-           showMessage("Unable to create new Directory");
+            showMessage("Unable to create new Directory");
         }
     }
+
 
     /**
      * Prompts user to create new remote directory.
@@ -840,15 +763,12 @@ public class CommandSFTP {
         createRemoteDir(sc.nextLine());
     }
 
+
     /**
      * Attempts to delete a remote directory.
      * @param fileName file to delete.
      */
     private void deleteRemoteDirectory(String fileName) {
-        if (!checkConnected()) {
-            return;
-        }
-
         try {
             this.channel.rmdir(fileName);
         }
@@ -856,6 +776,7 @@ public class CommandSFTP {
             showMessage("Unable to delete Directory");
         }
     }
+
 
     /**
      * Prompts user to delete remote file.
@@ -865,14 +786,12 @@ public class CommandSFTP {
         deleteRemoteDirectory(sc.nextLine());
     }
 
+
     /**
      * Sets the timeout for the session.
      * @param timeout time to set for timeout.
      */
     private void setTimeout(int timeout) {
-        if (!checkConnected()) {
-            return;
-        }
         //TODO(gelever): find out what units these are.  ms?
         try {
             this.session.setTimeout(timeout);
@@ -883,15 +802,11 @@ public class CommandSFTP {
 
     }
 
+
     /**
      * Prompts user to set timeout length
      */
-
     private void setTimeout() {
-        if (!checkConnected()) {
-            return;
-        }
-
         int userInput;
         while(true) {
             showMessage("Timeout in Milliseconds: ");
@@ -904,7 +819,6 @@ public class CommandSFTP {
                 showMessage("Positive Integers Only!\n");
                 continue;
             }
-
             if (userInput >= 0) {
                 setTimeout(userInput);
                 break;
@@ -915,6 +829,7 @@ public class CommandSFTP {
 
         }
     }
+
 
     /**
      * Checks if local file exists and prompts user whether or not to overwrite local file w/ remote file.
@@ -930,8 +845,9 @@ public class CommandSFTP {
         }
 
         //Relative file path
-        if(new File(this.localCurrentDirectory + "/" + fileName).isFile() ||
-                new File(this.localCurrentDirectory + "/" + fileName).isDirectory()) {
+        File relFileName = new File(this.channel.lpwd() + "/" + fileName);
+        if(relFileName.isFile() ||
+                relFileName.isDirectory()) {
             showMessage("Local Overwrite " + fileName + "? (Y/N): ");
             String userInput = sc.nextLine();
             return userInput.equalsIgnoreCase("y");
@@ -944,9 +860,6 @@ public class CommandSFTP {
      * Lists files on the remote working directory.
      */
     private void listCurrentRemoteFiles() {
-        if (!checkConnected()) {
-            return;
-        }
         try {
             Vector ls = channel.ls(channel.pwd());
             if (ls == null) {
@@ -967,6 +880,7 @@ public class CommandSFTP {
             showMessage(je.toString());
         }
     }
+
 
     /**
      * Adds a host key to the specified file.
@@ -994,6 +908,7 @@ public class CommandSFTP {
         return true;
     }
 
+
     /**
      * Sets the known hosts file.  Creates it if it doesn't exist.
      * Creates default file at user.home/.ssh/sftp_hosts if no file is specified.
@@ -1001,7 +916,6 @@ public class CommandSFTP {
      * @return true on success, false otherwise.
      */
     private boolean setKnownHostsFile(String fileName) {
-
         try {
             this.jsch.setKnownHosts(fileName);
         }
@@ -1010,7 +924,7 @@ public class CommandSFTP {
             if (fileName.equals("")) {
                 String userHome = System.getProperty( "user.home" );
                 if (! new File(userHome + ".ssh").isDirectory()) {
-                        new File(userHome +"/.ssh").mkdir();
+                    new File(userHome +"/.ssh").mkdir();
                 }
                 this.knownHostsFile = userHome + "/.ssh/sftp_hosts";
 
@@ -1041,6 +955,7 @@ public class CommandSFTP {
         return true;
     }
 
+
     /**
      * Determines if all the required information has been set.
      * @return true if evertything is valid, false otherwise.
@@ -1053,37 +968,26 @@ public class CommandSFTP {
                 this.user != null;
     }
 
-    /**
-     * Checks if the session is currently connectec, closes all channels otherwise
-     * @return true if still connected, false otherwise
-     */
-    private boolean checkConnected() {
-        if (!this.isConnected()) {
-            showMessage("Not Connected!");
-            this.quit();
-
-            return false;
-        }
-        return true;
-    }
 
     /**
      * Attempts to quit the server the connection.
      * @return true on success, false otherwise.
      */
     public boolean quit() {
-        if (this.session != null) {
-            if (this.channel != null){
-                this.channel.quit();
+        if (this.checkConnect()) {
+            this.checkConnect = false;
+            if (this.session != null) {
+                if (this.channel != null) {
+                    this.channel.quit();
+                }
+                this.session.disconnect();
+                showMessage("Server Disconnected! \n");
+                return true;
             }
-            this.session.disconnect();
-            this.isConnected = false;
-            return true;
         }
-        this.channel.quit();
-        this.session.disconnect();
         return false;
     }
+
 
     /**
      * Displays a message to the user.
