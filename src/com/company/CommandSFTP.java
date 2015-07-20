@@ -252,7 +252,7 @@ public class CommandSFTP {
      * Handles SFTP Menu user input.
      */
     public void mainSFTPMenu() {
-        System.out.println("HELLO");
+
         if (!checkConnect) {
             this.quit();
             return;
@@ -262,16 +262,16 @@ public class CommandSFTP {
             switch(userInput) {
                 case 1: {
                     remoteSFTPMenu();
-                    return;
-                }
+
+                } break;
                 case 2: {
                     localSFTPMenu();
-                    return;
-                }
+
+                } break;
                 case 3: {
                     optionsSFTPMenu();
-                    return;
-                }
+
+                } break;
                 case 4: {
                     showMessage("Server Disconnected! \n");
                     checkConnect =false;
@@ -299,20 +299,20 @@ public class CommandSFTP {
             switch(userInput) {
                 case 1: {
                    setTimeout();
-                    return;
-                }
+
+                } break;
                 case 2: {
                     setFileDisplay();
-                    return;
-                }
+
+                } break;
                 case 3: {
                     showMessage("MORE OPTIONS");
-                    return;
-                }
+
+                } break;
                 case 4: {
                     showMessage("MORE OPTIONS");
-                    return;
-                }
+
+                } break;
                 case 5: {
                     return;
                 }
@@ -344,30 +344,30 @@ public class CommandSFTP {
             switch(userInput) {
                 case 1: {
                     listCurrentRemoteDirectory();
-                    return;
-                }
+
+                } break;
                 case 2: {
                     listCurrentRemoteFiles();
-                    return;
-                }
+
+                } break;
                 case 3: {
                     changeRemoteDirectory();
-                    return;
-                }
+
+                } break;
                 case 4: {
                     createRemoteDir();
-                    return;
-                }
+
+                } break;
                 case 5: {
                     //TODO(): Make sure this works for directories
                     deleteRemoteDirectory();
-                    return;
-                }
+
+                } break;
                 case 6: {
                    //TODO(): Implement this
                     renameRemoteDirectory();
-                    return;
-                }
+
+                } break;
                 case 7: {
                     return;
                 }
@@ -397,20 +397,20 @@ public class CommandSFTP {
             switch(userInput) {
                 case 1: {
                     uploadRemoteFile();
-                    return;
-                }
+
+                } break;
                 case 2: {
                     getRemoteFile();
-                    return;
-                }
+
+                } break;
                 case 3: {
                     getMultipleRemote();
-                    return;
-                }
+
+                } break;
                 case 4: {
                     deleteRemoteFile();
-                    return;
-                }
+
+                } break;
                 case 5: {
                     return;
                 }
@@ -454,7 +454,7 @@ public class CommandSFTP {
                 }
                 case 5: {
                     showMessage("Server Disconnected! \n");
-                    this.quit();
+                    checkConnect = false;
                     return;
                 }
                 default:
