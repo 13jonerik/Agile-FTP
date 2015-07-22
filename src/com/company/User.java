@@ -98,7 +98,6 @@ public class User implements UserInfo {
     public boolean promptPassword() {
         showMessage("Password:");
 
-        //TODO(gelever): test this from command line
         //Modified from https://docs.oracle.com/javase/7/docs/api/java/io/Console.html#readPassword%28%29
         Console cons;
         char[] passwd;
@@ -140,5 +139,9 @@ public class User implements UserInfo {
     @Override
     public void showMessage(String s) {
         System.out.print(s + " ");
+    }
+
+    public void clearPass() {
+        this.password = "";
     }
 }

@@ -22,7 +22,6 @@ import static org.junit.Assert.assertEquals;
 public class CommandMockTests {
     private final ByteArrayOutputStream outContent = new ByteArrayOutputStream();
     private final ByteArrayOutputStream errContent = new ByteArrayOutputStream();
-    private PrintStream original = System.out;
     private Method method;
     private CommandSFTP validCommand;
     private CommandSFTP invalidCommand;

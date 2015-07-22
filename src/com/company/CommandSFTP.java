@@ -133,6 +133,7 @@ public class CommandSFTP {
             return false;
         }
         this.checkConnect = true;
+        this.user.clearPass();
         return true;
     }
 
@@ -365,7 +366,7 @@ public class CommandSFTP {
                 } break;
                 case 5: {
                     renameRemoteFile();
-                }
+                } break;
                 case 6: {
                     return;
                 }
