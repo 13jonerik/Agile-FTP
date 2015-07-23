@@ -459,7 +459,6 @@ public class CommandSFTP {
                     listCurrentLocalDirectoryFiles();
                 } break;
                 case 4: {
-                    //TODO(gelever): Implement this.
                     renameLocalFile();
                 } break;
                 case 5: {
@@ -827,7 +826,6 @@ public class CommandSFTP {
             else {
                 showMessage("Positive Integers Only!\n");
             }
-
         }
     }
 
@@ -898,7 +896,8 @@ public class CommandSFTP {
                 file.createNewFile();
             }
             tmpwriter = new FileWriter(file);
-            tmpwriter.append(this.hostIP + " ssh-rsa " + key + "\n");
+            String toWrite = this.hostIP + " ssh-rsa " + key + "\n";
+            tmpwriter.append(toWrite);
 
             tmpwriter.flush();
             tmpwriter.close();
@@ -938,8 +937,7 @@ public class CommandSFTP {
                 File file = new File(fileName);
                 File directory = new File(file.getParentFile().getAbsolutePath());
                 directory.mkdirs();
-
-                boolean success = file.createNewFile();
+                file.createNewFile();
 
                 this.jsch.setKnownHosts(fileName);
                 this.knownHostsFile = fileName;
@@ -959,7 +957,7 @@ public class CommandSFTP {
 
     /**
      * Determines if all the required information has been set.
-     * @return true if evertything is valid, false otherwise.
+     * @return true if everything is valid, false otherwise.
      */
     public boolean isValid() {
         return this.jsch != null &&
