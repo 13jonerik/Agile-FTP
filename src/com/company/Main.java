@@ -37,8 +37,8 @@ public class Main {
                     command.setUser(user);
 
                     //Validate user input
-                    if (!(user.validUser() && command.isValid())) {
-                        System.out.println("\nRequires valid User and Server Info!");
+                    if (!(user.validUser())) {
+                        System.out.println("\nRequires Valid User Info!");
                         break;
                     }
 

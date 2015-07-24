@@ -4,7 +4,6 @@ import com.jcraft.jsch.*;
 
 import java.io.*;
 import java.nio.file.*;
-import java.util.Arrays;
 import java.util.Scanner;
 import java.util.Vector;
 
@@ -125,8 +124,8 @@ public class CommandSFTP {
      * @return true if successful connection, false otherwise.
      */
     public boolean connect() {
-        if (!(this.user != null &&
-                this.user.validUser() && this.isValid())) {
+        if (!isValid()) {
+            showMessage("\nRequires Valid Server Information!\n");
             return false;
         }
 
@@ -137,7 +136,7 @@ public class CommandSFTP {
             this.channelConnect();
         }
         catch (IOException e) {
-            showMessage("Unable to set known hosts file!");
+            showMessage("Unable to Set Known Hosts File!");
             return false;
         }
         catch (JSchException j ) {
@@ -1015,9 +1014,13 @@ public class CommandSFTP {
                 fileName = System.getProperty("user.home") + fileName.subSequence(1, fileName.length() );
         }
         File file = new File(fileName);
-        File directory = new File(file.getParentFile().getAbsolutePath());
+
         if (!file.exists()) {
-            directory.mkdirs();
+            File parentFile = file.getParentFile();
+            if (parentFile != null) {
+                File directory = new File(file.getParentFile().getAbsolutePath());
+                directory.mkdirs();
+            }
             file.createNewFile();
         }
 
@@ -1033,6 +1036,7 @@ public class CommandSFTP {
     public boolean isValid() {
         return this.jsch != null &&
                 this.hostIP != null &&
+                !this.hostIP.equals("") &&
                 this.knownHostsFile != null &&
                 this.portNumber >= 0 &&
                 this.user != null;
