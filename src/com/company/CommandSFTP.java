@@ -2,10 +2,9 @@ package com.company;
 
 import com.jcraft.jsch.*;
 
-import java.io.File;
-import java.io.FileWriter;
-import java.io.IOException;
+import java.io.*;
 import java.nio.file.*;
+import java.util.Arrays;
 import java.util.Scanner;
 import java.util.Vector;
 
@@ -19,14 +18,14 @@ public class CommandSFTP {
     private String hostIP = "";
     private String knownHostsFile = "";
     private int portNumber;
-    private final String [] hostChecking = {"StrictHostKeyChecking", "yes"};
+    private final static String [] hostChecking = {"StrictHostKeyChecking", "yes"};
     private User user = null;
 
     private JSch jsch = null;
     private Session session = null;
     private ChannelSftp channel = null;
 
-    private static final int timeout = 10000;
+    private int timeout = 10000;
 
     private boolean fileDisplay = false;
     private boolean checkConnect = false;
@@ -80,8 +79,6 @@ public class CommandSFTP {
      * Prompts user to enter server information.
      */
     public void promptInfo() {
-        //NOTE(gelever): should this be set after a successful connection?
-        //checkConnect = true;                     //reset to true so user can log back in from main menu
         showMessage("Host IP: ");
         this.hostIP = sc.nextLine();
 
@@ -132,13 +129,37 @@ public class CommandSFTP {
                 this.user.validUser() && this.isValid())) {
             return false;
         }
-        if(!setKnownHostsFile(this.knownHostsFile)) {
+
+        try {
+            this.setKnownHostsFile(this.knownHostsFile);
+            this.setSession();
+            this.connectSession();
+            this.channelConnect();
+        }
+        catch (IOException e) {
+            showMessage("Unable to set known hosts file!");
             return false;
         }
-        if (!(setSession(this.user) && connectSession(this.user) && channelConnect())) {
+        catch (JSchException j ) {
+            if (j.getMessage().contains("UnknownHostException")) {
+                showMessage("\nCan't Reach Server!\n");
+            }
+            else if (j.getMessage().contains("socket")) {
+                showMessage("\nUnable to Establish Connection!\n");
+            }
+            else if (j.getMessage().contains("refused")) {
+                showMessage("\nServer Connection Refused!\n");
+            }
+            else if (j.getMessage().contains("Packet corrupt") ) {
+                showMessage("\nInvalid Server Credentials!\n");
+            }
+            else {
+                showMessage("Unable to Create Connection!");
+            }
             return false;
         }
-        this.checkConnect = true;
+
+        this.checkConnect = this.session.isConnected();
         this.user.clearPass();
         return true;
     }
@@ -146,107 +167,96 @@ public class CommandSFTP {
 
     /**
      * Requests a session from jsch with the server information and sets the user password.
-     * @param user  User information
-     * @return true on success, false otherwise
      */
-    private boolean setSession(User user) {
-        try {
-            this.session = this.jsch.getSession(user.getUserName(), this.hostIP, this.portNumber);
-            this.session.setPassword(user.getPassword());
-        }
-        catch (JSchException je) {
-            //TODO: Handle exception properly?
-            showMessage("Unable to Connect!\n");
-            return false;
-        }
-        return true;
+    private void setSession() throws JSchException {
+            this.session = this.jsch.getSession(this.user.getUserName(), this.hostIP, this.portNumber);
+            this.session.setPassword(this.user.getPassword());
     }
 
 
     /**
      * Connects the channel to the current session.
-     * @return true on success, false otherwise.
      */
-    private boolean channelConnect() {
-        try {
+    private void channelConnect() throws JSchException{
             this.channel = (ChannelSftp)this.session.openChannel("sftp");
-            this.channel.connect(timeout);
-        }
-        catch (JSchException e) {
-            showMessage("Unable to Connect!");
-            return false;
-        }
-        return true;
+            this.channel.connect(this.timeout);
     }
 
 
     /**
      * Attempts to correct the current session.
-     * @param user User information
-     * @return true on success, false otherwise.
      */
-    private boolean connectSession(User user) {
+    private void connectSession() throws JSchException, IOException {
+        boolean tryConnect = false;
+
+        //getHostKey() rejects and returns null if there is no attempt to connect first.
+        //When session.getHostKey() is null, it's not possible to pull hostKey from server to
+        //prompt user to add it to known hosts file.
+        //I can't figure out why. So this try/catch block looks uglier than necessary.
         try {
-            this.session.connect(timeout);
+            this.session.connect();
+            tryConnect = true; //successfully connected.
         }
-        catch (JSchException je) {
-            //Connection error
-            if (je.getMessage().contains("timeout")) {
-                showMessage("Server Timeout!");
-                return false;
-            }
-            else if (je.getMessage().contains("socket")) {
-                showMessage("\nUnable to connect to server!\n");
-                return false;
-            }
-            //Unknown Host
-            else if(je.getMessage().contains("UnknownHost")) {
-                showMessage("Can't reach server!\n");
-                return false;
-
-            }
-
-            //HostFileError
-            else if(je.getMessage().contains("reject HostKey")) {
-
-                //Prompt user to add key to host file.
-                if(session.getHostKey() != null) {
-                    showMessage("Add '" + this.hostIP + "' to host file?(Y/N): ");
-                    String userInput = sc.nextLine();
-                    if(userInput.equalsIgnoreCase("y")) {
-                        showMessage("\nCannot connect without known hosts file!");
-                        return false;
+        catch (JSchException j ) {
+            if (j.getMessage().contains("reject")) {
+                if (this.session != null && this.session.getHostKey() != null) {
+                    if (!checkHostFile(this.session.getHostKey().getKey(), this.knownHostsFile)) {
+                        if (promptAddToHost()) {
+                            addHost(this.session.getHostKey().getKey(), this.knownHostsFile);
+                            setKnownHostsFile(this.knownHostsFile);
+                            this.session = this.jsch.getSession(user.getUserName(), this.hostIP, this.portNumber);
+                            this.session.setPassword(user.getPassword());
+                            this.session.connect(this.timeout);
+                            tryConnect = this.session.isConnected();
+                        } else {
+                            throw new JSchException("Unable to Set Known Hosts File!");
+                        }
                     }
-                    if(!addHost(session.getHostKey().getKey(), this.knownHostsFile)){
-                        showMessage("Error setting known hosts file!");
-                        return false;
-                    }
-                }
-                else {
-                    showMessage("Unable to reach server!");
-                    return false;
-                }
-
-                boolean success = setKnownHostsFile(this.knownHostsFile);
-                if (!success) {
-                    showMessage("Unable to set host file\n");
-                    return false;
-                }
-                else {
-                    //Retry connection after setting up new host file key.
-                    try {
-                        this.session = this.jsch.getSession(user.getUserName(), this.hostIP, this.portNumber);
-                        this.session.setPassword(user.getPassword());
-                        this.session.connect();
-                    }
-                    catch (JSchException tryAgain) {
-                        System.err.println(tryAgain.getCause().toString());
-                        showMessage("Unable to connect!");
-                    }
+                } else {
+                    throw new JSchException("Unable to Reach Server!\n");
                 }
             }
         }
-        return true;
+        if (!tryConnect) {
+            throw new JSchException("Unable to Connect!\n");
+        }
+    }
+
+
+    /**
+     * Asks the user if she wishes to add host to known hosts file.
+     * @return true if yes add to file, false otherwise.
+     */
+    private boolean promptAddToHost() {
+        showMessage("Add '" + this.hostIP + "' to host file?(Y/N): ");
+        return sc.nextLine().equalsIgnoreCase("y");
+    }
+
+
+    /**
+     * Checks if host is in host file.
+     * @param key key to look for
+     * @param fileName where to check for host
+     * @return true if host is found, false otherwise.
+     * @throws IOException if trouble occurs while reading host file.
+     */
+    public boolean checkHostFile(String key, String fileName) throws IOException{
+        File file = new File(fileName);
+        if (!file.exists()) {
+            return false;
+        }
+        else {
+            BufferedReader br = new BufferedReader(new FileReader(file));
+            while (br.ready()) {
+                String host = br.readLine();
+                if (host.contains(key) && host.contains(this.hostIP)) {
+                    br.close();
+                    return true;
+                }
+            }
+            br.close();
+        }
+        return false;
     }
 
 
@@ -970,26 +980,19 @@ public class CommandSFTP {
      * Modified from https://stackoverflow.com/questions/19063115/jschexception-unknownhostkey
      * @param key key that is to be added to the file
      * @param fileName file that will hold the key.
-     * @return true on success, false otherwise.
      */
-    private boolean addHost(String key, String fileName){
-        try {
-            FileWriter tmpwriter;
-            File file = new File(fileName);
-            if (!file.exists()) {
-                file.createNewFile();
-            }
-            tmpwriter = new FileWriter(file);
-            String toWrite = this.hostIP + " ssh-rsa " + key + "\n";
-            tmpwriter.append(toWrite);
-
-            tmpwriter.flush();
-            tmpwriter.close();
-
-        } catch (IOException e) {
-            return false;
+    private void addHost(String key, String fileName) throws IOException{
+        FileWriter tmpwriter;
+        File file = new File(fileName);
+        if (!file.exists()) {
+            file.createNewFile();
         }
-        return true;
+        tmpwriter = new FileWriter(file);
+        String toWrite = this.hostIP + " ssh-rsa " + key + "\n";
+        tmpwriter.append(toWrite);
+
+        tmpwriter.flush();
+        tmpwriter.close();
     }
 
 
@@ -997,45 +1000,29 @@ public class CommandSFTP {
      * Sets the known hosts file.  Creates it if it doesn't exist.
      * Creates default file at user.home/.ssh/sftp_hosts if no file is specified.
      * @param fileName Where to create the file.
-     * @return true on success, false otherwise.
      */
-    private boolean setKnownHostsFile(String fileName) {
-        try {
-            this.jsch.setKnownHosts(fileName);
-        }
-        catch (JSchException je) {
-            //showMessage(je.toString());
-            if (fileName.equals("")) {
-                String userHome = System.getProperty( "user.home" );
-                if (! new File(userHome + ".ssh").isDirectory()) {
-                    new File(userHome +"/.ssh").mkdir();
-                }
-                this.knownHostsFile = userHome + "/.ssh/sftp_hosts";
+    private void setKnownHostsFile(String fileName) throws JSchException, IOException{
+        if (fileName.equals("")) {
+            String userHome = System.getProperty( "user.home" );
+            if (! new File(userHome + ".ssh").isDirectory()) {
+                new File(userHome +"/.ssh").mkdir();
+            }
+            this.knownHostsFile = userHome + "/.ssh/sftp_hosts";
 
-                fileName = this.knownHostsFile;
-            }
-            try {
-                if (fileName.startsWith("~/")) {
-                    fileName = System.getProperty("user.home") + fileName.subSequence(1, fileName.length() );
-                }
-                File file = new File(fileName);
-                File directory = new File(file.getParentFile().getAbsolutePath());
-                directory.mkdirs();
-                file.createNewFile();
-
-                this.jsch.setKnownHosts(fileName);
-                this.knownHostsFile = fileName;
-            }
-            catch (IOException e) {
-                showMessage("Error Creating Known Hosts File");
-                return false;
-            }
-            catch (JSchException tryAgain) {
-                showMessage("Unable to set knownHosts file");
-                return false;
-            }
+            fileName = this.knownHostsFile;
         }
-        return true;
+        else if (fileName.startsWith("~/")) {
+                fileName = System.getProperty("user.home") + fileName.subSequence(1, fileName.length() );
+        }
+        File file = new File(fileName);
+        File directory = new File(file.getParentFile().getAbsolutePath());
+        if (!file.exists()) {
+            directory.mkdirs();
+            file.createNewFile();
+        }
+
+        this.jsch.setKnownHosts(fileName);
+        this.knownHostsFile = fileName;
     }
 
 

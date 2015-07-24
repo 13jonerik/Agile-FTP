@@ -5,6 +5,7 @@ import org.junit.Before;
 import org.junit.Test;
 
 import java.io.*;
+import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.nio.file.DirectoryStream;
 import java.nio.file.Files;
@@ -23,6 +24,7 @@ public class CommandMockTests {
     private final ByteArrayOutputStream outContent = new ByteArrayOutputStream();
     private final ByteArrayOutputStream errContent = new ByteArrayOutputStream();
     private Method method;
+    private PrintStream orig = System.out;
     private CommandSFTP validCommand;
     private CommandSFTP invalidCommand;
     private String host = "linux.cecs.pdx.edu";
@@ -115,10 +117,14 @@ public class CommandMockTests {
     public void testSetKnownHostsFile() throws Exception {
         method = validCommand.getClass().getDeclaredMethod("setKnownHostsFile", String.class);
         method.setAccessible(true);
-        Boolean result;
+        Field knownHost = validCommand.getClass().getDeclaredField("knownHostsFile");
+        knownHost.setAccessible(true);
         String fileName = System.getProperty("user.home") + "/testHostsFile.txt";
-        result = (Boolean) method.invoke(validCommand, fileName);
-        assertEquals(result, true);
+
+        method.invoke(validCommand, fileName);
+        Object val = knownHost.get(validCommand);
+
+        assertEquals(val.equals(fileName), true);
 
         File file = new File(fileName);
         boolean exists = file.exists();
@@ -135,9 +141,8 @@ public class CommandMockTests {
         Boolean result;
         String fileName = System.getProperty("user.home") + "/testHostsFile.txt";
 
-        result = (Boolean) method.invoke(validCommand, "key", fileName);
+        method.invoke(validCommand, "key", fileName);
 
-        assertEquals(result, true);
 
         File file = new File(fileName);
         boolean exists = file.exists();
