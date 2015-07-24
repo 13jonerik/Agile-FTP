@@ -183,16 +183,6 @@ public class CommandMockTests {
 
     }
 
-    @Test
-    @SuppressWarnings("SftpException")
-    public void testSetTimeout() throws Exception {
-        validCommand.connect();
-        method = validCommand.getClass().getDeclaredMethod("setTimeout", int.class);
-        method.setAccessible(true);
-
-        method.invoke(validCommand, 100000);
-        assertEquals(outContent.toString().contains("Unable"), false);
-    }
 
     @Test
     public void testCreateDeleteRemoteDir() throws Exception {
@@ -264,7 +254,7 @@ public class CommandMockTests {
 
 
     @Test
-    public void testChangeRemoteDirectory() throws Exception {
+    public void testListAndChangeRemoteDirectory() throws Exception {
         validCommand.connect();
         Method methodChangeFile = validCommand.getClass().getDeclaredMethod("changeRemoteDirectory", String.class);
         Method methodListDir = validCommand.getClass().getDeclaredMethod("listCurrentRemoteDirectory");
@@ -284,7 +274,6 @@ public class CommandMockTests {
 
         outContent.reset();
         methodListDir.invoke(this.validCommand);
-
         assertEquals(outContent.toString().contains(testDir), true);
 
         methodChangeFile.invoke(this.validCommand, "..");
@@ -384,6 +373,87 @@ public class CommandMockTests {
 
         new File(newFileName).delete();
     }
+
+    @Test
+    public void testListAndChangeLocalDirectory() throws Exception {
+        validCommand.connect();
+        Method methodChangeLocalDir = validCommand.getClass().getDeclaredMethod("changeCurrentLocalDirectory", String.class);
+        Method methodListCurrentDir = validCommand.getClass().getDeclaredMethod("listCurrentLocalDirectory");
+
+        methodChangeLocalDir.setAccessible(true);
+        methodListCurrentDir.setAccessible(true);
+        String newDirectory = "TESTDIR";
+        File file = new File(newDirectory);
+        file.mkdir();
+        assertEquals(file.exists(), true);
+
+        outContent.reset();
+
+        methodListCurrentDir.invoke(validCommand);
+        assertEquals(outContent.toString().contains(newDirectory), false);
+
+        methodChangeLocalDir.invoke(validCommand, newDirectory);
+
+        outContent.reset();
+        methodListCurrentDir.invoke(validCommand);
+
+        assertEquals(outContent.toString().contains(newDirectory), true);
+
+        file.delete();
+    }
+
+    @Test
+    public void testListLocalFiles() throws Exception {
+        validCommand.connect();
+        Method methodListLocalFiles = validCommand.getClass().getDeclaredMethod("listCurrentLocalDirectoryFiles");
+        Method methodListCurrentDir = validCommand.getClass().getDeclaredMethod("listCurrentLocalDirectory");
+
+        methodListLocalFiles.setAccessible(true);
+        methodListCurrentDir.setAccessible(true);
+
+        String newFile = "TESTFILE";
+
+        outContent.reset();
+        methodListCurrentDir.invoke(validCommand);
+        assertEquals(outContent.toString().contains(newFile), false);
+
+        File file = new File(newFile);
+        file.createNewFile();
+        assertEquals(file.exists(), true);
+
+        outContent.reset();
+        methodListLocalFiles.invoke(validCommand);
+        assertEquals(outContent.toString().contains(newFile), true);
+
+        file.delete();
+
+        outContent.reset();
+        methodListLocalFiles.invoke(validCommand);
+        assertEquals(outContent.toString().contains(newFile), false);
+    }
+
+    @Test
+    public void testSetGetTimeOut() throws Exception {
+        validCommand.connect();
+        Method methodGetTimeout = validCommand.getClass().getDeclaredMethod("getTimeout");
+        Method methodSetTimeout = validCommand.getClass().getDeclaredMethod("setTimeout", int.class);
+
+        int timeout = 10000;
+
+        methodGetTimeout.setAccessible(true);
+        methodSetTimeout.setAccessible(true);
+
+        assertEquals(methodGetTimeout.invoke(validCommand), 0);
+
+        methodSetTimeout.invoke(validCommand, timeout);
+
+        methodSetTimeout.invoke(invalidCommand, timeout);
+
+        assertEquals(methodGetTimeout.invoke(validCommand), timeout);
+
+
+    }
+
 
 
 }

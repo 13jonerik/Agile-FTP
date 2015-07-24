@@ -66,7 +66,13 @@ public class CommandSFTP {
      * @return true if connected, false otherwise.
      */
     public boolean checkConnect() {
-        return this.checkConnect;
+        if (this.session != null && this.session.isConnected() && this.checkConnect) {
+            return true;
+        }
+        else {
+            this.quit();
+            return false;
+        }
     }
 
 
@@ -345,6 +351,7 @@ public class CommandSFTP {
 
     }
 
+
     /**
      * Handles remote file menu system for remote management
      */
@@ -380,6 +387,7 @@ public class CommandSFTP {
         }
     }
 
+
     /**
      * Handles remote file and directory menu system for remote management
      */
@@ -412,6 +420,7 @@ public class CommandSFTP {
 
     }
 
+
     /**
      * Handles remote file permissions menu system for remote management
      */
@@ -439,7 +448,6 @@ public class CommandSFTP {
         }
 
     }
-
 
 
     /**
@@ -482,6 +490,10 @@ public class CommandSFTP {
      * @param newName new file name
      */
     private void renameLocalFile(String oldName, String newName) {
+        if (!this.checkConnect()) {
+            return;
+        }
+
         File oldFile = new File(this.channel.lpwd() + "/" + oldName);
         File newFile = new File(this.channel.lpwd() + "/" + newName);
         if(newFile.exists()) {
@@ -498,6 +510,10 @@ public class CommandSFTP {
      * Prompts the user to rename a local file.
       */
     private void renameLocalFile() {
+        if (!this.checkConnect()) {
+            return;
+        }
+
         showMessage("File to Rename: ");
         String oldFileName = sc.nextLine();
 
@@ -513,6 +529,10 @@ public class CommandSFTP {
      * @param newName what to rename the directory or file
      */
     private void renameRemote(String oldName, String newName) {
+        if (!this.checkConnect()) {
+            return;
+        }
+
         try {
             channel.rename(oldName, newName);
         }
@@ -526,6 +546,10 @@ public class CommandSFTP {
      * Prompts the user to rename a remote file.
      */
     private void renameRemoteFile() {
+        if (!this.checkConnect()) {
+            return;
+        }
+
         showMessage("File to rename: ");
         String oldFileName = sc.nextLine();
 
@@ -539,6 +563,10 @@ public class CommandSFTP {
      * Prompts the user to rename a remote directory.
      */
     private void renameRemoteDirectory() {
+        if (!this.checkConnect()) {
+            return;
+        }
+
         showMessage("Directory to rename: ");
         String oldFileName = sc.nextLine();
 
@@ -562,6 +590,10 @@ public class CommandSFTP {
      * @param fileName file to delete.
      */
     private void deleteRemoteFile(String fileName) {
+        if (!this.checkConnect()) {
+            return;
+        }
+
         try {
             this.channel.rm(fileName);
         }
@@ -576,6 +608,10 @@ public class CommandSFTP {
      * @param fileName file to upload
      */
     private void uploadRemoteFile(String fileName) {
+        if (!this.checkConnect()) {
+            return;
+        }
+
         //TODO: Create overwrite prompt for remote file upload. is possible?
         String absoluteFileName = this.channel.lpwd() + "/" + fileName;
         File testExists = new File(absoluteFileName);
@@ -606,6 +642,10 @@ public class CommandSFTP {
      * @param fileName directory to change into.
      */
     private void changeRemoteDirectory(String fileName) {
+        if (!this.checkConnect()) {
+            return;
+        }
+
         try {
             this.channel.cd(fileName);
         }
@@ -643,6 +683,10 @@ public class CommandSFTP {
      * Lists the current remote working directory.
      */
     private void listCurrentRemoteDirectory() {
+        if (!this.checkConnect()) {
+            return;
+        }
+
         try {
             System.out.println(this.channel.pwd());
         }
@@ -656,6 +700,9 @@ public class CommandSFTP {
      * Changes the current local directory.
      */
     private void changeCurrentLocalDirectory(String directory) {
+        if (!this.checkConnect()) {
+            return;
+        }
        try {
            this.channel.lcd(directory);
        }
@@ -676,6 +723,9 @@ public class CommandSFTP {
      * Displays the current local directory.
      */
     private void listCurrentLocalDirectory() {
+        if (!this.checkConnect()) {
+            return;
+        }
         showMessage(this.channel.lpwd() + "\n");
     }
 
@@ -684,6 +734,9 @@ public class CommandSFTP {
      * Shows all files and directories in current local directroy.
      */
     private void listCurrentLocalDirectoryFiles() {
+        if (!this.checkConnect()) {
+            return;
+        }
         Path directory = Paths.get(this.channel.lpwd());
         try (DirectoryStream<Path> stream = Files.newDirectoryStream(directory, "*")){
             for (Path path : stream) {
@@ -706,6 +759,9 @@ public class CommandSFTP {
      * @param fileName File to receive.
      */
     private void getRemoteFile(String fileName) {
+        if (!this.checkConnect()) {
+            return;
+        }
         try {
             this.channel.get(fileName, fileName);
         }
@@ -746,6 +802,9 @@ public class CommandSFTP {
      * @param dirName Name of new directory.
      */
     private void createRemoteDir(String dirName) {
+        if (!this.checkConnect()) {
+            return;
+        }
         try {
             this.channel.mkdir(dirName);
         }
@@ -769,6 +828,9 @@ public class CommandSFTP {
      * @param fileName file to delete.
      */
     private void deleteRemoteDirectory(String fileName) {
+        if (!this.checkConnect()) {
+            return;
+        }
         try {
             this.channel.rmdir(fileName);
         }
@@ -792,6 +854,10 @@ public class CommandSFTP {
      * @param timeout time to set for timeout.
      */
     private void setTimeout(int timeout) {
+        if (!this.checkConnect()) {
+            return;
+        }
+
         //TODO(gelever): find out what units these are.  ms?
         try {
             this.session.setTimeout(timeout);
@@ -831,11 +897,27 @@ public class CommandSFTP {
 
 
     /**
+     * Gets the current timeout.
+     * @return the current timeout. -1 if unable to retrieve.
+     */
+    private int getTimeout() {
+        if (!this.checkConnect()) {
+            return -1;
+        }
+        return this.session.getTimeout();
+    }
+
+
+    /**
      * Checks if local file exists and prompts user whether or not to overwrite local file w/ remote file.
      * @param fileName File to look for to check if it exists.
      * @return true to over write or not found, false otherwise.
      */
     private boolean overWriteLocalFile(String fileName) {
+        if (!this.checkConnect()) {
+            return false;
+        }
+
         //Absolute file path
         if(new File(fileName).isFile() || new File(fileName).isDirectory()) {
             showMessage("OverWrite Local File?: " + fileName + " (Y/N): ");
@@ -859,6 +941,9 @@ public class CommandSFTP {
      * Lists files on the remote working directory.
      */
     private void listCurrentRemoteFiles() {
+        if (!this.checkConnect()) {
+            return;
+        }
         try {
             Vector ls = channel.ls(channel.pwd());
             if (ls == null) {
@@ -875,8 +960,7 @@ public class CommandSFTP {
             }
         }
         catch (SftpException je) {
-            //TODO(): Handle this more gracefully?
-            showMessage(je.toString());
+            showMessage("Unable to List Remote File! \n");
         }
     }
 
@@ -973,7 +1057,7 @@ public class CommandSFTP {
      * @return true on success, false otherwise.
      */
     public boolean quit() {
-        if (this.checkConnect()) {
+        if (this.checkConnect) {
             this.checkConnect = false;
             if (this.session != null) {
                 if (this.channel != null) {
