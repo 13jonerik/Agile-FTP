@@ -17,7 +17,7 @@ public class CommandSFTP {
     private String hostIP = "";
     private String knownHostsFile = "";
     private int portNumber;
-    private final static String [] hostChecking = {"StrictHostKeyChecking", "yes"};
+    private final static String [] hostChecking = {"StrictHostKeyChecking", "ask"};
     private User user = null;
 
     private JSch jsch = null;
@@ -168,8 +168,10 @@ public class CommandSFTP {
      * Requests a session from jsch with the server information and sets the user password.
      */
     private void setSession() throws JSchException {
-            this.session = this.jsch.getSession(this.user.getUserName(), this.hostIP, this.portNumber);
-            this.session.setPassword(this.user.getPassword());
+        this.session = this.jsch.getSession(this.user.getUserName(), this.hostIP, this.portNumber);
+        this.session.setConfig(hostChecking[0], hostChecking[1]);
+        this.session.setUserInfo(this.user);
+        this.session.setPassword(this.user.getPassword());
     }
 
 
@@ -177,8 +179,8 @@ public class CommandSFTP {
      * Connects the channel to the current session.
      */
     private void channelConnect() throws JSchException{
-            this.channel = (ChannelSftp)this.session.openChannel("sftp");
-            this.channel.connect(this.timeout);
+        this.channel = (ChannelSftp)this.session.openChannel("sftp");
+        this.channel.connect(this.timeout);
     }
 
 
@@ -186,76 +188,7 @@ public class CommandSFTP {
      * Attempts to correct the current session.
      */
     private void connectSession() throws JSchException, IOException {
-        boolean tryConnect = false;
-
-        //getHostKey() rejects and returns null if there is no attempt to connect first.
-        //When session.getHostKey() is null, it's not possible to pull hostKey from server to
-        //prompt user to add it to known hosts file.
-        //I can't figure out why. So this try/catch block looks uglier than necessary.
-        try {
-            this.session.connect();
-            tryConnect = true; //successfully connected.
-        }
-        catch (JSchException j ) {
-            if (j.getMessage().contains("reject")) {
-                if (this.session != null && this.session.getHostKey() != null) {
-                    if (!checkHostFile(this.session.getHostKey().getKey(), this.knownHostsFile)) {
-                        if (promptAddToHost()) {
-                            addHost(this.session.getHostKey().getKey(), this.knownHostsFile);
-                            setKnownHostsFile(this.knownHostsFile);
-                            this.session = this.jsch.getSession(user.getUserName(), this.hostIP, this.portNumber);
-                            this.session.setPassword(user.getPassword());
-                            this.session.connect(this.timeout);
-                            tryConnect = this.session.isConnected();
-                        } else {
-                            throw new JSchException("Unable to Set Known Hosts File!");
-                        }
-                    }
-                } else {
-                    throw new JSchException("Unable to Reach Server!\n");
-                }
-            }
-        }
-        if (!tryConnect) {
-            throw new JSchException("Unable to Connect!\n");
-        }
-    }
-
-
-    /**
-     * Asks the user if she wishes to add host to known hosts file.
-     * @return true if yes add to file, false otherwise.
-     */
-    private boolean promptAddToHost() {
-        showMessage("Add '" + this.hostIP + "' to host file?(Y/N): ");
-        return sc.nextLine().equalsIgnoreCase("y");
-    }
-
-
-    /**
-     * Checks if host is in host file.
-     * @param key key to look for
-     * @param fileName where to check for host
-     * @return true if host is found, false otherwise.
-     * @throws IOException if trouble occurs while reading host file.
-     */
-    public boolean checkHostFile(String key, String fileName) throws IOException{
-        File file = new File(fileName);
-        if (!file.exists()) {
-            return false;
-        }
-        else {
-            BufferedReader br = new BufferedReader(new FileReader(file));
-            while (br.ready()) {
-                String host = br.readLine();
-                if (host.contains(key) && host.contains(this.hostIP)) {
-                    br.close();
-                    return true;
-                }
-            }
-            br.close();
-        }
-        return false;
+        this.session.connect(this.timeout);
     }
 
 
@@ -517,7 +450,7 @@ public class CommandSFTP {
 
     /**
      * Prompts the user to rename a local file.
-      */
+     */
     private void renameLocalFile() {
         if (!this.checkConnect()) {
             return;
@@ -712,12 +645,12 @@ public class CommandSFTP {
         if (!this.checkConnect()) {
             return;
         }
-       try {
-           this.channel.lcd(directory);
-       }
-       catch (SftpException e) {
+        try {
+            this.channel.lcd(directory);
+        }
+        catch (SftpException e) {
             showMessage("Unable to change local directory!");
-       }
+        }
     }
     /**
      * Changes the current local directory.
@@ -974,25 +907,6 @@ public class CommandSFTP {
     }
 
 
-    /**
-     * Adds a host key to the specified file.
-     * Modified from https://stackoverflow.com/questions/19063115/jschexception-unknownhostkey
-     * @param key key that is to be added to the file
-     * @param fileName file that will hold the key.
-     */
-    private void addHost(String key, String fileName) throws IOException{
-        FileWriter tmpwriter;
-        File file = new File(fileName);
-        if (!file.exists()) {
-            file.createNewFile();
-        }
-        tmpwriter = new FileWriter(file);
-        String toWrite = this.hostIP + " ssh-rsa " + key + "\n";
-        tmpwriter.append(toWrite);
-
-        tmpwriter.flush();
-        tmpwriter.close();
-    }
 
 
     /**
@@ -1011,7 +925,7 @@ public class CommandSFTP {
             fileName = this.knownHostsFile;
         }
         else if (fileName.startsWith("~/")) {
-                fileName = System.getProperty("user.home") + fileName.subSequence(1, fileName.length() );
+            fileName = System.getProperty("user.home") + fileName.subSequence(1, fileName.length() );
         }
         File file = new File(fileName);
 

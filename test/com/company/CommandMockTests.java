@@ -129,29 +129,6 @@ public class CommandMockTests {
     }
 
 
-
-    @Test
-    public void testAddHost() throws Exception{
-        method = validCommand.getClass().getDeclaredMethod("addHost", String.class, String.class);
-        method.setAccessible(true);
-        Boolean result;
-        String fileName = System.getProperty("user.home") + "/testHostsFile.txt";
-
-        method.invoke(validCommand, "key", fileName);
-
-
-        File file = new File(fileName);
-        boolean exists = file.exists();
-        assertEquals(exists, true);
-
-        BufferedReader br = new BufferedReader(new FileReader(file));
-        String addedToHost = br.readLine();
-        assertEquals(addedToHost, this.host + " ssh-rsa " + "key");
-        br.close();
-        file.delete();
-
-    }
-
     @Test
     @SuppressWarnings("SftpException")
     public void testListCurrentRemoteFiles() throws Exception{

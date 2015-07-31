@@ -129,7 +129,8 @@ public class User implements UserInfo {
      */
     @Override
     public boolean promptYesNo(String s) {
-        return false;
+        showMessage(s + "\n(Yes/No)? : ");
+        return sc.nextLine().equals("yes");
     }
 
     /**
