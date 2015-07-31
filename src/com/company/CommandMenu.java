@@ -90,6 +90,18 @@ public class CommandMenu {
         });
     }
 
+    /**
+     * Displays an initial user menu.
+     */
+    public static int showMainMenu() {
+        //TODO(): Possible add more selections (options, load user from file, etc).
+        return processMenu("Main Menu", new String[] {
+                "Connect to Server",
+                "Quit"
+        });
+    }
+
+
     public static int processMenu(String title, String [] options) {
 
         System.out.println("\n" +title +":");

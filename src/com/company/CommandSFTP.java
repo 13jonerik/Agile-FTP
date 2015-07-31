@@ -192,238 +192,6 @@ public class CommandSFTP {
     }
 
 
-    /**
-     * Handles SFTP Menu user input.
-     */
-    public void mainSFTPMenu() {
-        while(checkConnect()) {
-            int userInput = CommandMenu.showMainSFTPMenu();
-            switch(userInput) {
-                case 1: {
-                    remoteSFTPMenu();
-                } break;
-                case 2: {
-                    localSFTPMenu();
-                } break;
-                case 3: {
-                    optionsSFTPMenu();
-                } break;
-                case 0: {
-                    this.quit();
-                    return;
-                }
-                default:
-                    showMessage("Invalid Command!\n");
-            }
-        }
-
-    }
-
-
-    /**
-     * Handles options menu system.
-     */
-    private void optionsSFTPMenu() {
-        while(checkConnect()) {
-            int userInput = CommandMenu.showOptionsMenu();
-            switch(userInput) {
-                case 1: {
-                    setTimeout();
-                } break;
-                case 2: {
-                    setFileDisplay();
-                } break;
-                case 3: {
-                    showMessage("MORE OPTIONS");
-                } break;
-                case 4: {
-                    showMessage("MORE OPTIONS");
-                } break;
-                case 5: {
-                    return;
-                }
-                case 0: {
-                    this.quit();
-                    return;
-                }
-                default:
-                    showMessage("\nInvalid Command!\n");
-            }
-        }
-
-    }
-
-
-    /**
-     * Handles remote directory menu system for remote management
-     */
-    private void remoteSFTPDirMenu() {
-        while(checkConnect()) {
-            int userInput = CommandMenu.showDirectoryMenu("Remote");
-            switch(userInput) {
-                case 1: {
-                    listCurrentRemoteDirectory();
-                } break;
-                case 2: {
-                    listCurrentRemoteFiles();
-                } break;
-                case 3: {
-                    changeRemoteDirectory();
-                } break;
-                case 4: {
-                    createRemoteDir();
-                } break;
-                case 5: {
-                    deleteRemoteDirectory();
-                } break;
-                case 6: {
-                    renameRemoteDirectory();
-                } break;
-                case 7: {
-                    return;
-                }
-                case 0: {
-                    this.quit();
-                    return;
-                }
-                default:
-                    showMessage("\nInvalid Command!\n");
-            }
-        }
-
-    }
-
-
-    /**
-     * Handles remote file menu system for remote management
-     */
-    private void remoteSFTPFileMenu() {
-        while(checkConnect()) {
-            int userInput = CommandMenu.showRemoteFileMenu();
-            switch(userInput) {
-                case 1: {
-                    uploadRemoteFile();
-                } break;
-                case 2: {
-                    getMultipleRemote();
-                } break;
-                case 3: {
-                    deleteRemoteFile();
-                } break;
-                case 4: {
-                    listCurrentRemoteFiles();
-                } break;
-                case 5: {
-                    renameRemoteFile();
-                } break;
-                case 6: {
-                    return;
-                }
-                case 0: {
-                    this.quit();
-                    return;
-                }
-                default:
-                    showMessage("\nInvalid Command!\n");
-            }
-        }
-    }
-
-
-    /**
-     * Handles remote file and directory menu system for remote management
-     */
-    private void remoteSFTPMenu() {
-        //TODO(gelever): Finish up these calls.
-        while(checkConnect()) {
-            int userInput = CommandMenu.showManageMenu("Remote");
-            switch(userInput) {
-                case 1: {
-                    remoteSFTPFileMenu();
-                } break;
-                case 2: {
-                    remoteSFTPDirMenu();
-                } break;
-                case 3: {
-                    //TODO(): Finish remote permissions menu and uncomment out.
-                    //remoteSFTPPermissionMenu();
-                } break;
-                case 4: {
-                    return;
-                }
-                case 0: {
-                    this.quit();
-                    return;
-                }
-                default:
-                    showMessage("\nInvalid Command!\n");
-            }
-        }
-
-    }
-
-
-    /**
-     * Handles remote file permissions menu system for remote management
-     */
-    private void remoteSFTPPermissionMenu() {
-        //TODO(gelever): Finish up these calls.
-        while(checkConnect()) {
-            int userInput = CommandMenu.showRemotePermissionsMenu();
-            switch(userInput) {
-                case 1: {
-
-                } break;
-                case 2: {
-
-                } break;
-                case 3: {
-                    return;
-                }
-                case 0: {
-                    this.quit();
-                    return;
-                }
-                default:
-                    showMessage("\nInvalid Command!\n");
-            }
-        }
-
-    }
-
-
-    /**
-     * Handles local file menu system for local file management.
-     */
-    private void localSFTPMenu() {
-        while(checkConnect()) {
-            int userInput = CommandMenu.showLocalFileMenu();
-            switch(userInput) {
-                case 1: {
-                    listCurrentLocalDirectory();
-                } break;
-                case 2: {
-                    changeCurrentLocalDirectory();
-                } break;
-                case 3: {
-                    listCurrentLocalDirectoryFiles();
-                } break;
-                case 4: {
-                    renameLocalFile();
-                } break;
-                case 5: {
-                    return;
-                }
-                case 0: {
-                    this.quit();
-                    return;
-                }
-                default:
-                    showMessage("\nInvalid Command!\n");
-            }
-        }
-
-    }
 
 
     /**
@@ -451,7 +219,7 @@ public class CommandSFTP {
     /**
      * Prompts the user to rename a local file.
      */
-    private void renameLocalFile() {
+    public void renameLocalFile() {
         if (!this.checkConnect()) {
             return;
         }
@@ -487,7 +255,7 @@ public class CommandSFTP {
     /**
      * Prompts the user to rename a remote file.
      */
-    private void renameRemoteFile() {
+    public void renameRemoteFile() {
         if (!this.checkConnect()) {
             return;
         }
@@ -504,7 +272,7 @@ public class CommandSFTP {
     /**
      * Prompts the user to rename a remote directory.
      */
-    private void renameRemoteDirectory() {
+    public void renameRemoteDirectory() {
         if (!this.checkConnect()) {
             return;
         }
@@ -521,7 +289,7 @@ public class CommandSFTP {
     /**
      * Prompts the user to delete a file.
      */
-    private void deleteRemoteFile() {
+    public void deleteRemoteFile() {
         showMessage("File to Delete: ");
         deleteRemoteFile(sc.nextLine());
     }
@@ -573,7 +341,7 @@ public class CommandSFTP {
     /**
      * Prompts the user to select file to upload to remote directory.
      */
-    private void uploadRemoteFile() {
+    public void uploadRemoteFile() {
         showMessage("File to Upload: ");
         uploadRemoteFile(sc.nextLine());
     }
@@ -600,7 +368,7 @@ public class CommandSFTP {
     /**
      * Prompts user to change remote directory.
      */
-    private void changeRemoteDirectory() {
+    public void changeRemoteDirectory() {
         showMessage("Remote Directory: ");
         changeRemoteDirectory(sc.nextLine());
     }
@@ -609,7 +377,7 @@ public class CommandSFTP {
     /**
      * Sets whether or not to display full file information.
      */
-    private void setFileDisplay() {
+    public void setFileDisplay() {
         showMessage("Show Full File Information? (Y/N): ");
         String userInput = sc.nextLine();
         if (userInput.equalsIgnoreCase("y")) {
@@ -624,7 +392,7 @@ public class CommandSFTP {
     /**
      * Lists the current remote working directory.
      */
-    private void listCurrentRemoteDirectory() {
+    public void listCurrentRemoteDirectory() {
         if (!this.checkConnect()) {
             return;
         }
@@ -655,7 +423,7 @@ public class CommandSFTP {
     /**
      * Changes the current local directory.
      */
-    private void changeCurrentLocalDirectory() {
+    public void changeCurrentLocalDirectory() {
         showMessage("Directory: ");
         changeCurrentLocalDirectory(sc.nextLine());
     }
@@ -664,7 +432,7 @@ public class CommandSFTP {
     /**
      * Displays the current local directory.
      */
-    private void listCurrentLocalDirectory() {
+    public void listCurrentLocalDirectory() {
         if (!this.checkConnect()) {
             return;
         }
@@ -675,7 +443,7 @@ public class CommandSFTP {
     /**
      * Shows all files and directories in current local directroy.
      */
-    private void listCurrentLocalDirectoryFiles() {
+    public void listCurrentLocalDirectoryFiles() {
         if (!this.checkConnect()) {
             return;
         }
@@ -716,7 +484,7 @@ public class CommandSFTP {
     /**
      * Prompts user to receive remote file.
      */
-    private void getRemoteFile() {
+    public void getRemoteFile() {
         showMessage("File Name: ");
         String userInput = sc.nextLine();
 
@@ -730,7 +498,7 @@ public class CommandSFTP {
     /**
      * Prompts user to retrieve multiple remote files.
      */
-    private void getMultipleRemote() {
+    public void getMultipleRemote() {
         showMessage("Files (space separated): ");
         String [] files = sc.nextLine().split(" ");
         for (String s: files) {
@@ -759,7 +527,7 @@ public class CommandSFTP {
     /**
      * Prompts user to create new remote directory.
      */
-    private void createRemoteDir() {
+    public void createRemoteDir() {
         showMessage("Directory to create: ");
         createRemoteDir(sc.nextLine());
     }
@@ -785,7 +553,7 @@ public class CommandSFTP {
     /**
      * Prompts user to delete remote file.
      */
-    private void deleteRemoteDirectory() {
+    public void deleteRemoteDirectory() {
         showMessage("Directory to delete: ");
         deleteRemoteDirectory(sc.nextLine());
     }
@@ -814,7 +582,7 @@ public class CommandSFTP {
     /**
      * Prompts user to set timeout length
      */
-    private void setTimeout() {
+    public void setTimeout() {
         int userInput;
         while(true) {
             showMessage("Timeout in Milliseconds: ");
@@ -842,7 +610,7 @@ public class CommandSFTP {
      * Gets the current timeout.
      * @return the current timeout. -1 if unable to retrieve.
      */
-    private int getTimeout() {
+    public int getTimeout() {
         if (!this.checkConnect()) {
             return -1;
         }
@@ -882,7 +650,7 @@ public class CommandSFTP {
     /**
      * Lists files on the remote working directory.
      */
-    private void listCurrentRemoteFiles() {
+    public void listCurrentRemoteFiles() {
         if (!this.checkConnect()) {
             return;
         }
