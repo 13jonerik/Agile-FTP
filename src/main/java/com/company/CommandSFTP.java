@@ -734,6 +734,37 @@ public class CommandSFTP {
                 this.user != null;
     }
 
+    /**
+     * Change the file permissions
+     */
+    public void chmod(String fileName, String chmod,Session session) throws SftpException{
+        channel = connectSession();
+        if(checkConnect==true){
+            if(channelConnect()==true) {
+                chmod(fileName, chmod, channel);
+                channelDisconnect();
+            }
+            else{
+                channelConnect();
+                chmod(fileName, chmod, channel);
+                channelDisconnect();
+            }
+        }
+    }
+
+
+
+    /**
+     * Disconnects the channel from the current session.
+     */
+    private void channelDisconnect() throws JSchException{
+        if(channelConnect()=true)
+        {
+            this.disconnect(); //TODO(): Add tests to check this.
+        }
+    }
+
+
 
     /**
      * Attempts to quit the server the connection.
