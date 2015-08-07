@@ -548,11 +548,31 @@ public class CommandSFTP {
             return;
         }
         try {
+            if (!fileName.startsWith("/")) {
+                fileName = channel.pwd() + "/" + fileName;
+            }
+            Vector<ChannelSftp.LsEntry> ls = channel.ls(fileName);
+            if (ls == null ) {
+                return;
+            }
+            for (ChannelSftp.LsEntry item : ls) {
+                if (item != null) {
+                    boolean isDir = item.getAttrs().isDir();
+                    boolean isRootDir = item.getFilename().equals(".") || item.getFilename().equals("..");
+                    String filePath = fileName + "/" + item.getFilename();
+                    if (isDir) {
+                        if (!isRootDir) {
+                            this.deleteRemoteDirectory(filePath);
+                        }
+                    } else {
+                        this.deleteRemoteFile(filePath);
+                    }
+                }
+            }
             this.channel.rmdir(fileName);
         }
-        catch (SftpException e) {
-            //TODO: implement sub dir deletion.  jsch does not support recursive delete.  It must be implemented.
-            showMessage("Unable to delete remote directory.");
+        catch (SftpException je) {
+            showMessage("Unable to Delete Remote Directory! \n");
         }
     }
 
@@ -733,37 +753,6 @@ public class CommandSFTP {
                 this.portNumber >= 0 &&
                 this.user != null;
     }
-
-    /**
-     * Change the file permissions
-     */
-    public void chmod(String fileName, String chmod,Session session) throws SftpException{
-        channel = connectSession();
-        if(checkConnect==true){
-            if(channelConnect()==true) {
-                chmod(fileName, chmod, channel);
-                channelDisconnect();
-            }
-            else{
-                channelConnect();
-                chmod(fileName, chmod, channel);
-                channelDisconnect();
-            }
-        }
-    }
-
-
-
-    /**
-     * Disconnects the channel from the current session.
-     */
-    private void channelDisconnect() throws JSchException{
-        if(channelConnect()=true)
-        {
-            this.disconnect(); //TODO(): Add tests to check this.
-        }
-    }
-
 
 
     /**
