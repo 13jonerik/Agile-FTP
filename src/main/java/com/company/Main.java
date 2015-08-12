@@ -111,14 +111,6 @@ public class Main {
                 } break;
                 case 3: {
                     clearScreen();
-                    showMessage("MORE OPTIONS");
-                } break;
-                case 4: {
-                    clearScreen();
-                    showMessage("MORE OPTIONS");
-                } break;
-                case 5: {
-                    clearScreen();
                     return;
                 }
                 case 0: {
@@ -254,10 +246,6 @@ public class Main {
                     remoteSFTPDirMenu(command);
                 } break;
                 case 3: {
-                    //TODO(): Finish remote permissions menu and uncomment out.
-                    //remoteSFTPPermissionMenu();
-                } break;
-                case 4: {
                     clearScreen();
                     return;
                 }

@@ -7,6 +7,10 @@ import java.util.Scanner;
  * @version 1.0 alpha
  * @since <pre>7/9/15</pre>
  */
+
+/**
+ * Shows menu options to user and handles response.
+ */
 public class CommandMenu {
 
     /**
@@ -32,7 +36,6 @@ public class CommandMenu {
         return processMenu(location + " Menu", new String[] {
                 "File Management",
                 "Directory Management",
-                "Permission Management",
                 "SFTP Menu",
                 "Disconnect from Server",
 
@@ -96,8 +99,6 @@ public class CommandMenu {
         return processMenu("Options Menu", new String[] {
                 "Set Timeout Length",
                 "Show Full File Details",
-                "More Option",
-                "More Option",
                 "SFTP Menu",
                 "Disconnect from Server",
         });
