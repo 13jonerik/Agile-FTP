@@ -136,10 +136,11 @@ public class Main {
                 case 1: {
                     try {
                         command.setTimeout();
+                        clearScreen();
                     } catch (JSchException e) {
+                        clearScreen();
                         showMessage("Unable to set timeout");
                     }
-                    clearScreen();
                 } break;
                 case 2: {
                     command.setFileDisplay();
@@ -190,10 +191,11 @@ public class Main {
                 case 3: {
                     try {
                         command.changeRemoteDirectory();
+                        clearScreen();
                     } catch (SftpException e) {
+                        clearScreen();
                         showMessage("Unable to Change Remote Directory");
                     }
-                    clearScreen();
                     try {
                         command.listCurrentRemoteDirectory();
                     } catch (SftpException e) {
@@ -287,10 +289,11 @@ public class Main {
                 case 3: {
                     try {
                         command.deleteRemoteFile();
+                        clearScreen();
                     } catch (SftpException e) {
+                        clearScreen();
                         showMessage("Unable to Delete Remote Files");
                     }
-                    clearScreen();
                 } break;
                 case 4: {
                     clearScreen();
@@ -303,10 +306,11 @@ public class Main {
                 case 5: {
                     try {
                         command.renameRemoteFile();
+                        clearScreen();
                     } catch (SftpException e) {
+                        clearScreen();
                         showMessage("Unable to Rename Remote File");
                     }
-                    clearScreen();
                 } break;
                 case 6: {
                     clearScreen();
@@ -373,11 +377,12 @@ public class Main {
                 case 2: {
                     try {
                         command.changeCurrentLocalDirectory();
+                        clearScreen();
+                        command.listCurrentLocalDirectory();
                     } catch (SftpException e) {
+                        clearScreen();
                         showMessage("Unable to Change Directory");
                     }
-                    clearScreen();
-                    command.listCurrentLocalDirectory();
                 } break;
                 case 3: {
                     clearScreen();
@@ -388,14 +393,13 @@ public class Main {
                     }
                 } break;
                 case 4: {
-                    clearScreen();
-                    command.renameLocalFile();
                     try {
-                        command.listCurrentLocalDirectoryFiles();
+                        command.renameLocalFile();
+                        clearScreen();
                     } catch (IOException e) {
-                        showMessage("Unable to List Local Files");
+                        clearScreen();
+                        showMessage("Unable to Rename Local File");
                     }
-                    System.out.println();
                 } break;
                 case 5: {
                     clearScreen();
@@ -429,7 +433,7 @@ public class Main {
      * @param s Message to display.
      */
     public static void showMessage(String s) {
-        System.out.print(s);
+        System.out.println(s);
     }
 }
 

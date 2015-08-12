@@ -177,7 +177,7 @@ public class CommandSFTP {
      * @param oldName original file name
      * @param newName new file name
      */
-    public void renameLocalFile(String oldName, String newName) {
+    public void renameLocalFile(String oldName, String newName) throws IOException {
         if (!this.checkConnect()) {
             return;
         }
@@ -188,7 +188,7 @@ public class CommandSFTP {
             return;
         }
         if(!oldFile.renameTo(newFile)) {
-            showMessage("\nUnable to Rename File\n");
+            throw new IOException("Unable to Rename File");
         }
     }
 
@@ -196,7 +196,7 @@ public class CommandSFTP {
     /**
      * Prompts the user to rename a local file.
      */
-    public void renameLocalFile() {
+    public void renameLocalFile() throws IOException {
         if (!this.checkConnect()) {
             return;
         }
