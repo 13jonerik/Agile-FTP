@@ -1,10 +1,12 @@
 package com.company;
 
+import com.jcraft.jsch.JSchException;
 import org.junit.*;
 import org.junit.Test;
 
 import java.io.ByteArrayOutputStream;
 import java.io.File;
+import java.io.IOException;
 import java.io.PrintStream;
 import java.lang.reflect.Field;
 
@@ -25,7 +27,7 @@ public class TestCommandSFTP {
 
 
     @BeforeClass
-    public static void beforeClass() throws NoSuchMethodException, NoSuchFieldException {
+    public static void beforeClass() throws NoSuchMethodException, NoSuchFieldException, IOException, JSchException {
         server.start();
         commandSFTP.setUser(new User("remote user", "password"));
         commandSFTP.connect();

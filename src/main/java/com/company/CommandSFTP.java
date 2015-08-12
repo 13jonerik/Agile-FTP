@@ -123,40 +123,16 @@ public class CommandSFTP {
      * Connects the user to the specified server. Assumes server information has already been provided.
      * @return true if successful connection, false otherwise.
      */
-    public boolean connect() {
+    public boolean connect() throws JSchException, IOException {
         if (!isValid()) {
             showMessage("\nRequires Valid Server Information!\n");
             return false;
         }
 
-        try {
-            this.setKnownHostsFile(this.knownHostsFile);
-            this.setSession();
-            this.connectSession();
-            this.channelConnect();
-        }
-        catch (IOException e) {
-            showMessage("Unable to Set Known Hosts File!");
-            return false;
-        }
-        catch (JSchException j ) {
-            if (j.getMessage().contains("UnknownHostException")) {
-                showMessage("\nCan't Reach Server!\n");
-            }
-            else if (j.getMessage().contains("socket")) {
-                showMessage("\nUnable to Establish Connection!\n");
-            }
-            else if (j.getMessage().contains("refused")) {
-                showMessage("\nServer Connection Refused!\n");
-            }
-            else if (j.getMessage().contains("Packet corrupt") ) {
-                showMessage("\nInvalid Server Credentials!\n");
-            }
-            else {
-                showMessage("Unable to Create Connection!");
-            }
-            return false;
-        }
+        this.setKnownHostsFile(this.knownHostsFile);
+        this.setSession();
+        this.connectSession();
+        this.channelConnect();
 
         this.checkConnect = this.session.isConnected();
         this.user.clearPass();
@@ -196,8 +172,6 @@ public class CommandSFTP {
     }
 
 
-
-
     /**
      * Renames a local file.
      * @param oldName original file name
@@ -207,7 +181,6 @@ public class CommandSFTP {
         if (!this.checkConnect()) {
             return;
         }
-
         File oldFile = new File(this.channel.lpwd() + "/" + oldName);
         File newFile = new File(this.channel.lpwd() + "/" + newName);
         if(newFile.exists()) {
@@ -227,7 +200,6 @@ public class CommandSFTP {
         if (!this.checkConnect()) {
             return;
         }
-
         showMessage("File to Rename: ");
         String oldFileName = sc.nextLine();
 
@@ -242,28 +214,21 @@ public class CommandSFTP {
      * @param oldName name of directory or file to be renamed
      * @param newName what to rename the directory or file
      */
-    public void renameRemote(String oldName, String newName) {
+    public void renameRemote(String oldName, String newName) throws SftpException{
         if (!this.checkConnect()) {
             return;
         }
-
-        try {
-            channel.rename(oldName, newName);
-        }
-        catch (SftpException e) {
-            showMessage("Unable to Rename!");
-        }
+        channel.rename(oldName, newName);
     }
 
 
     /**
      * Prompts the user to rename a remote file.
      */
-    public void renameRemoteFile() {
+    public void renameRemoteFile() throws SftpException{
         if (!this.checkConnect()) {
             return;
         }
-
         showMessage("File to rename: ");
         String oldFileName = sc.nextLine();
 
@@ -276,11 +241,10 @@ public class CommandSFTP {
     /**
      * Prompts the user to rename a remote directory.
      */
-    public void renameRemoteDirectory() {
+    public void renameRemoteDirectory() throws SftpException{
         if (!this.checkConnect()) {
             return;
         }
-
         showMessage("Directory to rename: ");
         String oldFileName = sc.nextLine();
 
@@ -293,7 +257,7 @@ public class CommandSFTP {
     /**
      * Prompts the user to delete a file.
      */
-    public void deleteRemoteFile() {
+    public void deleteRemoteFile() throws SftpException{
         showMessage("File to Delete: ");
         deleteRemoteFile(sc.nextLine());
     }
@@ -303,17 +267,11 @@ public class CommandSFTP {
      * Attempts to delete a remote file.
      * @param fileName file to delete.
      */
-    public void deleteRemoteFile(String fileName) {
+    public void deleteRemoteFile(String fileName) throws  SftpException{
         if (!this.checkConnect()) {
             return;
         }
-
-        try {
-            this.channel.rm(fileName);
-        }
-        catch (SftpException e) {
-            showMessage("Unable to Delete File!");
-        }
+        this.channel.rm(fileName);
     }
 
 
@@ -321,11 +279,10 @@ public class CommandSFTP {
      * Uploads file to current remote directory.
      * @param fileName file to upload
      */
-    public void uploadRemoteFile(String fileName) {
+    public void uploadRemoteFile(String fileName) throws SftpException {
         if (!this.checkConnect()) {
             return;
         }
-
         //TODO: Create overwrite prompt for remote file upload. is possible?
         String absoluteFileName = this.channel.lpwd() + "/" + fileName;
         File testExists = new File(absoluteFileName);
@@ -333,19 +290,15 @@ public class CommandSFTP {
             showMessage("Unable to Find Local File: " + fileName );
             return;
         }
-        try {
-            this.channel.put(absoluteFileName, this.channel.pwd());
+        this.channel.put(absoluteFileName, this.channel.pwd());
 
-        } catch (SftpException e) {
-            showMessage("Unable to Upload File!");
-        }
     }
 
 
     /**
      * Prompts the user to select file to upload to remote directory.
      */
-    public void uploadRemoteFile() {
+    public void uploadRemoteFile() throws SftpException {
         showMessage("File to Upload: ");
         uploadRemoteFile(sc.nextLine());
     }
@@ -355,24 +308,18 @@ public class CommandSFTP {
      * changes the current remote directory.
      * @param fileName directory to change into.
      */
-    public void changeRemoteDirectory(String fileName) {
+    public void changeRemoteDirectory(String fileName) throws SftpException {
         if (!this.checkConnect()) {
             return;
         }
-
-        try {
-            this.channel.cd(fileName);
-        }
-        catch (SftpException je) {
-            showMessage("Invalid Selection!");
-        }
+        this.channel.cd(fileName);
     }
 
 
     /**
      * Prompts user to change remote directory.
      */
-    public void changeRemoteDirectory() {
+    public void changeRemoteDirectory() throws SftpException {
         showMessage("Remote Directory: ");
         changeRemoteDirectory(sc.nextLine());
     }
@@ -396,17 +343,11 @@ public class CommandSFTP {
     /**
      * Lists the current remote working directory.
      */
-    public void listCurrentRemoteDirectory() {
+    public void listCurrentRemoteDirectory() throws SftpException {
         if (!this.checkConnect()) {
             return;
         }
-
-        try {
-            System.out.println(this.channel.pwd());
-        }
-        catch (SftpException je) {
-            showMessage("Error in Listing Directory!");
-        }
+        System.out.println(this.channel.pwd());
     }
 
 
@@ -414,21 +355,16 @@ public class CommandSFTP {
      * Changes the current local directory.
      * @param directory Directory to change into.
      */
-    public void changeCurrentLocalDirectory(String directory) {
+    public void changeCurrentLocalDirectory(String directory) throws SftpException {
         if (!this.checkConnect()) {
             return;
         }
-        try {
-            this.channel.lcd(directory);
-        }
-        catch (SftpException e) {
-            showMessage("Unable to change local directory!");
-        }
+        this.channel.lcd(directory);
     }
     /**
      * Changes the current local directory.
      */
-    public void changeCurrentLocalDirectory() {
+    public void changeCurrentLocalDirectory() throws SftpException {
         showMessage("Directory: ");
         changeCurrentLocalDirectory(sc.nextLine());
     }
@@ -448,25 +384,22 @@ public class CommandSFTP {
     /**
      * Shows all files and directories in current local directory.
      */
-    public void listCurrentLocalDirectoryFiles() {
+    public void listCurrentLocalDirectoryFiles() throws IOException{
         if (!this.checkConnect()) {
             return;
         }
         Path directory = Paths.get(this.channel.lpwd());
-        try (DirectoryStream<Path> stream = Files.newDirectoryStream(directory, "*")){
-            System.out.println();
-            for (Path path : stream) {
-                if (this.fileDisplay) {
-                    System.out.println(path);
-                }
-                else {
-                    System.out.println(path.getFileName());
-                }
+        DirectoryStream<Path> stream = Files.newDirectoryStream(directory, "*");
+        System.out.println();
+        for (Path path : stream) {
+            if (this.fileDisplay) {
+                System.out.println(path);
+            }
+            else {
+                System.out.println(path.getFileName());
             }
         }
-        catch (IOException e) {
-            showMessage("Current Local Directory Not Found!");
-        }
+        stream.close();
     }
 
 
@@ -474,23 +407,18 @@ public class CommandSFTP {
      * Retrieves a file from the current remote directory.
      * @param fileName File to receive.
      */
-    public void getRemoteFile(String fileName) {
+    public void getRemoteFile(String fileName) throws SftpException {
         if (!this.checkConnect()) {
             return;
         }
-        try {
-            this.channel.get(fileName, fileName);
-        }
-        catch(SftpException e) {
-            showMessage("Unable to retrieve remote file: " + fileName + "\n");
-        }
+        this.channel.get(fileName, fileName);
     }
 
 
     /**
      * Prompts user to receive remote file.
      */
-    public void getRemoteFile() {
+    public void getRemoteFile() throws SftpException {
         showMessage("File Name: ");
         String userInput = sc.nextLine();
 
@@ -504,7 +432,7 @@ public class CommandSFTP {
     /**
      * Prompts user to retrieve multiple remote files.
      */
-    public void getMultipleRemote() {
+    public void getMultipleRemote() throws SftpException {
         showMessage("Files (space separated): ");
         String [] files = sc.nextLine().split(" ");
         for (String s: files) {
@@ -517,23 +445,18 @@ public class CommandSFTP {
      * Creates a new remote directory in the current remote working directory.
      * @param dirName Name of new directory.
      */
-    public void createRemoteDir(String dirName) {
+    public void createRemoteDir(String dirName) throws SftpException {
         if (!this.checkConnect()) {
             return;
         }
-        try {
-            this.channel.mkdir(dirName);
-        }
-        catch (SftpException e) {
-            showMessage("Unable to create new Directory");
-        }
+        this.channel.mkdir(dirName);
     }
 
 
     /**
      * Prompts user to create new remote directory.
      */
-    public void createRemoteDir() {
+    public void createRemoteDir() throws SftpException {
         showMessage("Directory to create: ");
         createRemoteDir(sc.nextLine());
     }
@@ -543,44 +466,39 @@ public class CommandSFTP {
      * Attempts to delete a remote directory.
      * @param fileName file to delete.
      */
-    public void deleteRemoteDirectory(String fileName) {
+    public void deleteRemoteDirectory(String fileName) throws SftpException {
         if (!this.checkConnect()) {
             return;
         }
-        try {
-            if (!fileName.startsWith("/")) {
-                fileName = channel.pwd() + "/" + fileName;
-            }
-            Vector<ChannelSftp.LsEntry> ls = channel.ls(fileName);
-            if (ls == null ) {
-                return;
-            }
-            for (ChannelSftp.LsEntry item : ls) {
-                if (item != null) {
-                    boolean isDir = item.getAttrs().isDir();
-                    boolean isRootDir = item.getFilename().equals(".") || item.getFilename().equals("..");
-                    String filePath = fileName + "/" + item.getFilename();
-                    if (isDir) {
-                        if (!isRootDir) {
-                            this.deleteRemoteDirectory(filePath);
-                        }
-                    } else {
-                        this.deleteRemoteFile(filePath);
+        if (!fileName.startsWith("/")) {
+            fileName = channel.pwd() + "/" + fileName;
+        }
+        Vector<ChannelSftp.LsEntry> ls = channel.ls(fileName);
+        if (ls == null ) {
+            return;
+        }
+        for (ChannelSftp.LsEntry item : ls) {
+            if (item != null) {
+                boolean isDir = item.getAttrs().isDir();
+                boolean isRootDir = item.getFilename().equals(".") || item.getFilename().equals("..");
+                String filePath = fileName + "/" + item.getFilename();
+                if (isDir) {
+                    if (!isRootDir) {
+                        this.deleteRemoteDirectory(filePath);
                     }
+                } else {
+                    this.deleteRemoteFile(filePath);
                 }
             }
-            this.channel.rmdir(fileName);
         }
-        catch (SftpException je) {
-            showMessage("Unable to Delete Remote Directory! \n");
-        }
+        this.channel.rmdir(fileName);
     }
 
 
     /**
      * Prompts user to delete remote file.
      */
-    public void deleteRemoteDirectory() {
+    public void deleteRemoteDirectory() throws SftpException {
         showMessage("Directory to delete: ");
         deleteRemoteDirectory(sc.nextLine());
     }
@@ -590,26 +508,18 @@ public class CommandSFTP {
      * Sets the timeout for the session.
      * @param timeout time to set for timeout.
      */
-    public void setTimeout(int timeout) {
+    public void setTimeout(int timeout) throws JSchException {
         if (!this.checkConnect()) {
             return;
         }
-
-        //TODO(gelever): find out what units these are.  ms?
-        try {
-            this.session.setTimeout(timeout);
-        }
-        catch (JSchException e) {
-            showMessage("Unable to set timeout!");
-        }
-
+        this.session.setTimeout(timeout);
     }
 
 
     /**
      * Prompts user to set timeout length
      */
-    public void setTimeout() {
+    public void setTimeout() throws JSchException {
         int userInput;
         while(true) {
             showMessage("Timeout in Milliseconds: ");
@@ -677,32 +587,25 @@ public class CommandSFTP {
     /**
      * Lists files on the remote working directory.
      */
-    public void listCurrentRemoteFiles() {
+    public void listCurrentRemoteFiles() throws SftpException {
         if (!this.checkConnect()) {
             return;
         }
-        try {
-            Vector ls = channel.ls(channel.pwd());
-            if (ls == null) {
-                return;
-            }
-            System.out.println();
-            for (Object s : ls) {
-                if (s instanceof  ChannelSftp.LsEntry) {
-                    if (this.fileDisplay) {
-                        System.out.println(((ChannelSftp.LsEntry)s).getLongname());
-                    } else {
-                        System.out.println(((ChannelSftp.LsEntry)s).getFilename());
-                    }
+        Vector ls = channel.ls(channel.pwd());
+        if (ls == null) {
+            return;
+        }
+        System.out.println();
+        for (Object s : ls) {
+            if (s instanceof  ChannelSftp.LsEntry) {
+                if (this.fileDisplay) {
+                    System.out.println(((ChannelSftp.LsEntry)s).getLongname());
+                } else {
+                    System.out.println(((ChannelSftp.LsEntry)s).getFilename());
                 }
             }
         }
-        catch (SftpException je) {
-            showMessage("Unable to List Remote File! \n");
-        }
     }
-
-
 
 
     /**

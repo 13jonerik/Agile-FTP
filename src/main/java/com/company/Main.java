@@ -1,6 +1,11 @@
 package com.company;
 
 
+import com.jcraft.jsch.JSchException;
+import com.jcraft.jsch.SftpException;
+
+import java.io.IOException;
+
 /**
  * This Class handles the main menu that users see when then first start the program.
  * @author  Stephan Gelever
@@ -41,7 +46,34 @@ public class Main {
 
 
                     //If the connection is valid, proceed to SFTP application
-                    if(!command.connect()){
+                    boolean connected;
+                    try {
+                       connected = command.connect();
+                    }
+                    catch (IOException e) {
+                        showMessage("Unable to Set Known Hosts File!");
+                        continue;
+                    }
+                    catch (JSchException j ) {
+                        if (j.getMessage().contains("UnknownHostException")) {
+                            showMessage("\nCan't Reach Server!\n");
+                        }
+                        else if (j.getMessage().contains("socket")) {
+                            showMessage("\nUnable to Establish Connection!\n");
+                        }
+                        else if (j.getMessage().contains("refused")) {
+                            showMessage("\nServer Connection Refused!\n");
+                        }
+                        else if (j.getMessage().contains("Packet corrupt") ) {
+                            showMessage("\nInvalid Server Credentials!\n");
+                        }
+                        else {
+                            showMessage("Unable to Create Connection!");
+                        }
+                        continue;
+                    }
+
+                    if(!connected){
                         continue;
                     }
                     else {
@@ -102,7 +134,11 @@ public class Main {
             int userInput = CommandMenu.showOptionsMenu();
             switch(userInput) {
                 case 1: {
-                    command.setTimeout();
+                    try {
+                        command.setTimeout();
+                    } catch (JSchException e) {
+                        showMessage("Unable to set timeout");
+                    }
                     clearScreen();
                 } break;
                 case 2: {
@@ -137,32 +173,68 @@ public class Main {
             switch(userInput) {
                 case 1: {
                     clearScreen();
-                    command.listCurrentRemoteDirectory();
+                    try {
+                        command.listCurrentRemoteDirectory();
+                    } catch (SftpException e) {
+                        showMessage("Unable to List Directory");
+                    }
                 } break;
                 case 2: {
                     clearScreen();
-                    command.listCurrentRemoteFiles();
+                    try {
+                        command.listCurrentRemoteFiles();
+                    } catch (SftpException e) {
+                        showMessage("Unable to List Remote Files");
+                    }
                 } break;
                 case 3: {
-                    command.changeRemoteDirectory();
+                    try {
+                        command.changeRemoteDirectory();
+                    } catch (SftpException e) {
+                        showMessage("Unable to Change Remote Directory");
+                    }
                     clearScreen();
-                    command.listCurrentRemoteDirectory();
+                    try {
+                        command.listCurrentRemoteDirectory();
+                    } catch (SftpException e) {
+                        showMessage("Unable to List Remote Files");
+                    }
                 } break;
                 case 4: {
                     clearScreen();
-                    command.createRemoteDir();
+                    try {
+                        command.createRemoteDir();
+                    } catch (SftpException e) {
+                        showMessage("Unable to Create Remote Directory");
+                    }
                 } break;
                 case 5: {
                     clearScreen();
-                    command.listCurrentRemoteFiles();
+                    try {
+                        command.listCurrentRemoteFiles();
+                    } catch (SftpException e) {
+                        showMessage("Unable to List Remote Files");
+                    }
                     System.out.println();
-                    command.deleteRemoteDirectory();
+                    try {
+                        command.deleteRemoteDirectory();
+                    } catch (SftpException e) {
+                        showMessage("Unable to Delete Remote Directory");
+                    }
                 } break;
                 case 6: {
                     clearScreen();
-                    command.listCurrentRemoteFiles();
+                    try {
+                        command.listCurrentRemoteFiles();
+                    } catch (SftpException e) {
+                        showMessage("Unable to List Remote Files");
+                    }
                     System.out.println();
-                    command.renameRemoteDirectory();
+                    try {
+                        command.renameRemoteDirectory();
+                    } catch (SftpException e) {
+                        showMessage("Unable to Rename Remote Directory");
+                    }
                 } break;
                 case 7: {
                     clearScreen();
@@ -192,24 +264,48 @@ public class Main {
             switch(userInput) {
                 case 1: {
                     clearScreen();
-                    command.uploadRemoteFile();
+                    try {
+                        command.uploadRemoteFile();
+                    } catch (SftpException e) {
+                        showMessage("Unable to Upload File");
+                    }
                 } break;
                 case 2: {
                     clearScreen();
-                    command.listCurrentRemoteFiles();
+                    try {
+                        command.listCurrentRemoteFiles();
+                    } catch (SftpException e) {
+                        showMessage("Unable to List Remote Files");
+                    }
                     System.out.println();
-                    command.getMultipleRemote();
+                    try {
+                        command.getMultipleRemote();
+                    } catch (SftpException e) {
+                        showMessage("Unable to Download Files");
+                    }
                 } break;
                 case 3: {
-                    command.deleteRemoteFile();
+                    try {
+                        command.deleteRemoteFile();
+                    } catch (SftpException e) {
+                        showMessage("Unable to Delete Remote Files");
+                    }
                     clearScreen();
                 } break;
                 case 4: {
                     clearScreen();
-                    command.listCurrentRemoteFiles();
+                    try {
+                        command.listCurrentRemoteFiles();
+                    } catch (SftpException e) {
+                        showMessage("Unable to List Remote Files");
+                    }
                 } break;
                 case 5: {
-                    command.renameRemoteFile();
+                    try {
+                        command.renameRemoteFile();
+                    } catch (SftpException e) {
+                        showMessage("Unable to Rename Remote File");
+                    }
                     clearScreen();
                 } break;
                 case 6: {
@@ -234,7 +330,6 @@ public class Main {
      * @param command Where to send the user input.
      */
     private static void remoteSFTPMenu(CommandSFTP command) {
-        //TODO(gelever): Finish up these calls.
         while(command.checkConnect()) {
             int userInput = CommandMenu.showManageMenu("Remote");
             clearScreen();
@@ -264,39 +359,6 @@ public class Main {
 
 
     /**
-     * Handles remote file permissions menu system for remote management
-     * @param command Where to send the user input.
-     */
-    private void remoteSFTPPermissionMenu(CommandSFTP command) {
-        //TODO(gelever): Finish up these calls.
-        while(command.checkConnect()) {
-            int userInput = CommandMenu.showRemotePermissionsMenu();
-            //NOTE: Fix this positioning too.
-            clearScreen();
-
-            switch(userInput) {
-                case 1: {
-
-                } break;
-                case 2: {
-
-                } break;
-                case 3: {
-                    return;
-                }
-                case 0: {
-                    command.quit();
-                    return;
-                }
-                default:
-                    showMessage("\nInvalid Command!\n");
-            }
-        }
-
-    }
-
-
-    /**
      * Handles local file menu system for local file management.
      * @param command Where to send the user input.
      */
@@ -309,18 +371,30 @@ public class Main {
                     command.listCurrentLocalDirectory();
                 } break;
                 case 2: {
-                    command.changeCurrentLocalDirectory();
+                    try {
+                        command.changeCurrentLocalDirectory();
+                    } catch (SftpException e) {
+                        showMessage("Unable to Change Directory");
+                    }
                     clearScreen();
                     command.listCurrentLocalDirectory();
                 } break;
                 case 3: {
                     clearScreen();
-                    command.listCurrentLocalDirectoryFiles();
+                    try {
+                        command.listCurrentLocalDirectoryFiles();
+                    } catch (IOException e) {
+                        showMessage("Unable to List Directory");
+                    }
                 } break;
                 case 4: {
                     clearScreen();
                     command.renameLocalFile();
-                    command.listCurrentLocalDirectoryFiles();
+                    try {
+                        command.listCurrentLocalDirectoryFiles();
+                    } catch (IOException e) {
+                        showMessage("Unable to List Local Files");
+                    }
                     System.out.println();
                 } break;
                 case 5: {
